@@ -8,6 +8,9 @@ import SideBar from "./SideBar";
 
 type MainLayoutProps = PropsWithChildren;
 
+const DRAWER_WIDTH = 240;
+const COLLAPSED_WIDTH = 72;
+
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -16,9 +19,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-
+    <Box sx={{ display: "flex", minHeight: "100%", }}>
       {/* TopBar */}
       <TopBar
         isMobile={isMobile}
@@ -38,11 +39,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Box
         component="main"
         sx={{
-          display: "block"
+          flexGrow: 1, // take remaining space
+          width: "100%",
+          height: "100vh",
+          display: "flex",    // force normal flow, not flex
+          textAlign: "left",
+          paddingTop: "60px"
+          // marginLeft: `${isMobile ? 0 : collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH}px`,
         }}
       >
         {children ?? <Outlet />}
-      </Box>
+    </Box>
     </Box>
   );
 };

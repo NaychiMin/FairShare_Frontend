@@ -2,9 +2,11 @@ import { IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { useState } from "react";
 import { useAuth } from "../context/Authentication/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const TopBarUserMenu = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -14,6 +16,10 @@ const TopBarUserMenu = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const routeToProfile = () => {
+    setAnchorEl(null);
+    navigate('/profile');
+  }
   return (
     <div className="flex items-center">
       <Typography><b>{user?.name}</b></Typography>
@@ -31,7 +37,7 @@ const TopBarUserMenu = () => {
           },
         }}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
+        <MenuItem onClick={routeToProfile}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>Logout</MenuItem>
       </Menu>
     </div>
