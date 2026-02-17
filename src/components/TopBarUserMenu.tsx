@@ -5,7 +5,7 @@ import { useAuth } from "../context/Authentication/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const TopBarUserMenu = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -20,6 +20,10 @@ const TopBarUserMenu = () => {
     setAnchorEl(null);
     navigate('/profile');
   }
+  const handleLogout = () => {
+    setAnchorEl(null);
+    logout();
+  };
   return (
     <div className="flex items-center">
       <Typography><b>{user?.name}</b></Typography>
@@ -38,7 +42,7 @@ const TopBarUserMenu = () => {
         }}
       >
         <MenuItem onClick={routeToProfile}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
   )

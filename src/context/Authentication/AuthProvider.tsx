@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import authService from "../../services/authService";
 import { AuthContext } from "./AuthContext";
 import type { User } from "../../types/User";
+import { useNavigate } from "react-router-dom";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { navigate } = useNavigate();
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -31,6 +33,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+
+    navigate('/login');
   };
 
   return (

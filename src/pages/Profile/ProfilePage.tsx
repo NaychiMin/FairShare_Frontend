@@ -19,6 +19,7 @@ import UserAvatar from "../../components/UserAvatar";
 import ChangePasswordForm from "./ChangePasswordForm";
 import { AxiosError } from "axios";
 import authService from "../../services/authService";
+import { toast } from "react-toastify";
 
 export type ProfileFormInputs = {
   name: string;
@@ -75,7 +76,7 @@ const ProfilePage: React.FC = () => {
       const response = await authService.update(data, user?.userId || "nil", jwtToken || "");
       if (response.user) {
         updateUser(response.user);
-        setSuccess(true);
+        toast.success("Successfully updated profile.")
       }
     } catch (err) {
       console.error(error);
