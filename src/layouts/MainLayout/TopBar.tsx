@@ -5,7 +5,7 @@ import {
   IconButton,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import type { TopBarProps } from "./layout.types";
+import type { TopBarProps } from "./index.types";
 
 const TopBar = ({
   isMobile,

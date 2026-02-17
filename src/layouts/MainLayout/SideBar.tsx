@@ -1,6 +1,6 @@
 import React from "react";
 import { Drawer, Box, Typography, Toolbar } from "@mui/material";
-import type { SideBarProps } from "./layout.types";
+import type { SideBarProps } from "./index.types";
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 72;
