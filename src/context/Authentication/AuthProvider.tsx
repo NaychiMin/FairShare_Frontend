@@ -10,7 +10,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authService.isAuthenticated()
   );
 
-
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
 
@@ -19,6 +18,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(response.user);
 
     localStorage.setItem("token", response.jwt);
+  };
+
+  const updateUser = async (user: User) => {
+    setUser(user);
   };
 
   const logout = () => {
@@ -33,11 +36,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider
       value={{
-        isAuthenticated: !!jwtToken,
+        isAuthenticated,
         jwtToken,
         user,
         login,
         logout,
+        updateUser,
       }}
     >
       {children}
