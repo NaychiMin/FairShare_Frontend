@@ -22,8 +22,8 @@ const LoginPage = () => {
   });
   const errorMessageDefault = "Unable to log in at this time. Please try again later."
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); 
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setLoading(true);
