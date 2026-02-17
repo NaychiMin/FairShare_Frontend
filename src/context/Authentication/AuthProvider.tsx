@@ -1,25 +1,45 @@
 import React, { useState } from "react";
 import authService from "../../services/authService";
 import { AuthContext } from "./AuthContext";
+import type { User } from "../../types/User";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-
+  const [jwtToken, setJwtToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
     authService.isAuthenticated()
   );
 
+
   const login = async (email: string, password: string) => {
-    await authService.login({ email, password });
+    const response = await authService.login({ email, password });
+
     setIsAuthenticated(true);
+    setJwtToken(response.jwt);
+    setUser(response.user);
+
+    localStorage.setItem("token", response.jwt);
   };
 
   const logout = () => {
     authService.logout();
+    setJwtToken(null);
+    setUser(null);
+
+    localStorage.removeItem("token");
     setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: !!jwtToken,
+        jwtToken,
+        user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
