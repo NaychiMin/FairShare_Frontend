@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { TopBarProps } from "./index.types";
+import TopBarUserMenu from "../../components/TopBarUserMenu";
 
 const TopBar = ({
   isMobile,
@@ -31,6 +32,7 @@ const TopBar = ({
             <MenuIcon />
           </IconButton>
         )}
+        <TopBarUserMenu/>
       </Toolbar>
     </AppBar>
   );
