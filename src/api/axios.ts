@@ -1,8 +1,10 @@
 import axios from "axios"
 import authService from "../services/authService";
 
+const baseURL = import.meta.env.VITE_REACT_APP_FAIRSHARE_BACKEND_SERVICE_URL;
+
 const instance = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL
 });
 
 instance.interceptors.request.use((config) => {
