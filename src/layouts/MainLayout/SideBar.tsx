@@ -1,6 +1,7 @@
 import React from "react";
-import { Drawer, Box, Typography, Toolbar } from "@mui/material";
+import { Drawer, Box, Toolbar, MenuItem } from "@mui/material";
 import type { SideBarProps } from "./index.types";
+import { useNavigate } from "react-router-dom";
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 72;
@@ -11,9 +12,10 @@ const SideBar = ({
   collapsed,
   onClose
 }: SideBarProps) => {
+  const navigate = useNavigate()
   const drawerContent = (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6"></Typography>
+      <MenuItem onClick={()=>navigate('/groups')}>Groups</MenuItem>
     </Box>
   );
 

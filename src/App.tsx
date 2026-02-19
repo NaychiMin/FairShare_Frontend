@@ -9,6 +9,8 @@ import MainLayout from './layouts/MainLayout';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import ProtectedRoute from './context/Authentication/ProtectedRoute';
 import ProfilePage from './pages/Profile/ProfilePage';
+import GroupsPage from './pages/Groups/GroupsPage';
+import CreateGroupForm from './pages/Groups/NewGroup';
 
 function App() {
 
@@ -26,6 +28,8 @@ function App() {
         <Route element={<ProtectedRoute />}> {/* routes that are login-protected */}
           <Route element={<MainLayout />}> {/* routes WITH MainLayout */}
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="groups" element={<GroupsPage />} />
+            <Route path="newGroup" element={<CreateGroupForm />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
