@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, MenuItem } from '@mui/material';
 import { useAuth } from '../../context/Authentication/useAuth';
 import { useNavigate } from 'react-router-dom';
+import groupService from '../../services/groupService';
+import { toast } from 'react-toastify';
 
 const CreateGroupForm = () => {
-  const { user } = useAuth();
+  const { user, jwtToken } = useAuth();
   const [formData, setFormData] = useState({
-    group_name: '',
+    groupName: '',
     category: '',
   });
   const navigate = useNavigate();
@@ -23,14 +25,19 @@ const CreateGroupForm = () => {
     // This matches your MySQL schema structure
     const newGroup = {
       ...formData,
-      group_id: crypto.randomUUID(), // Client-side UUID generation
-      created_by: user?.userId,    // From your useAuth state
-      status: 'ACTIVE'
+      admin: user?.name
     };
 
     console.log("Submitting to MySQL:", newGroup);
-    // Add your axios/fetch call here to POST to your backend
-    navigate("/groups");
+    try {
+          const response = await groupService.create(newGroup, jwtToken || "");
+          if (response) {
+            toast.success("Successfully created group.")
+            navigate("/groups");
+          }
+        } catch (err) {
+          toast.error((err as any).response?.data?.message || "Failed to create group");
+        }
   };
 
   return (
@@ -40,10 +47,10 @@ const CreateGroupForm = () => {
       <Box component="form" onSubmit={handleSubmit} width={'80%'} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           label="Group Name"
-          name="group_name"
+          name="groupName"
           variant="outlined"
           required
-          value={formData.group_name}
+          value={formData.groupName}
           onChange={handleChange}
           fullWidth
         />
@@ -70,7 +77,7 @@ const CreateGroupForm = () => {
           variant="contained" 
           size="large"
           sx={{ width: '130px' }}
-          disabled={!formData.group_name}
+          disabled={!formData.groupName}
         >
           Create Group
         </Button>
