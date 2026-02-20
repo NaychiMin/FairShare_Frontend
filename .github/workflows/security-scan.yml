@@ -24,18 +24,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Snyk scan
+      - name: Run Snyk test and save output
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        # Save console output directly to a text file
         with:
-          args: test --file=package.json --prod --json --severity-threshold=high > snyk-report.json
+          args: test --severity-threshold=high > snyk-report.txt 2>&1
 
-      - name: Upload Snyk Report
+      - name: Upload Snyk report artifact
         uses: actions/upload-artifact@v4
         with:
           name: snyk-report
-          path: snyk-report.json
+          path: snyk-report.txt
 
       # # Monitor step (only on main branch to update dashboard)
       # - name: Monitor project in Snyk
