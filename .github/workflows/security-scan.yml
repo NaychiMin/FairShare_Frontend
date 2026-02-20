@@ -24,30 +24,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Snyk test (JSON)
+      - name: Run Snyk scan
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: test --json --severity-threshold=high > snyk-report.json
+          args: test --file=package.json --prod --json --severity-threshold=high > snyk-report.json
 
-      - name: Convert Snyk JSON to HTML
-        run: npx snyk-to-html -i snyk-report.json -o snyk-report.html
-
-      - name: Upload Snyk HTML Report
+      - name: Upload Snyk Report
         uses: actions/upload-artifact@v4
         with:
-          name: snyk-html-report
-          path: snyk-report.html
+          name: snyk-report
+          path: snyk-report.json
 
-      # Monitor step (only on main branch to update dashboard)
-      - name: Monitor project in Snyk
-        if: github.ref == 'refs/heads/main'
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: monitor --file=package.json --project-name=fairshare-frontend
+      # # Monitor step (only on main branch to update dashboard)
+      # - name: Monitor project in Snyk
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: snyk/actions/node@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     args: monitor --file=package.json --project-name=fairshare-frontend
 
   # sonar-scan:
   #   runs-on: ubuntu-latest
