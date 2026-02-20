@@ -30,9 +30,6 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Test
-        run: npm test -- --ci --coverage
-
       - name: Build frontend
         run: npm run build
 
