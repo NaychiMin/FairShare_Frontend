@@ -25,7 +25,8 @@ const CreateGroupForm = () => {
     // This matches your MySQL schema structure
     const newGroup = {
       ...formData,
-      admin: user?.name
+     // admin: user?.name
+      admin: user?.email
     };
 
     console.log("Submitting to MySQL:", newGroup);

@@ -22,6 +22,51 @@ class GroupService {
     return response.data;
   }
 
+
+  async getArchived(email: string, jwtToken: string) {
+    const response = await axios.get(`/group/archived/${email}`, {
+      headers: { Authorization: `Bearer ${jwtToken}` },
+    });
+    return response.data;
+  }
+
+  async archiveGroup(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(`/group/archive/${groupId}`, null, {
+      params: { requesterEmail },
+      headers: { Authorization: `Bearer ${jwtToken}` },
+    });
+    return response.data;
+  }
+
+  async unarchiveGroup(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(`/group/unarchive/${groupId}`, null, {
+      params: { requesterEmail },
+      headers: { Authorization: `Bearer ${jwtToken}` },
+    });
+    return response.data;
+  }
+
+  async updateGroup(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(`/group/${groupId}`, data, {
+      params: { requesterEmail }, // matches your controller @RequestParam
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  }
+
+  async deleteGroup(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.delete(`/group/${groupId}`, {
+      params: { requesterEmail },
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
+
   getToken() {
     return localStorage.getItem(TOKEN_KEY);
   }
