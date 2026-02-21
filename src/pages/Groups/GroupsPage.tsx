@@ -1,57 +1,3 @@
-// import { Button, Divider, Grid, ListItemText, MenuItem, MenuList,IconButton,
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   TextField } from "@mui/material";
-// import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-// import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { toast } from "react-toastify";
-// import groupService from "../../services/groupService";
-// import { useAuth } from "../../context/Authentication/useAuth";
-
-// const categories = ["Household", "Trip", "Event", "Project", "Other"];
-
-// const GroupsPage = () => {
-//   const navigate = useNavigate();
-//   const { user, jwtToken } = useAuth();
-//   const [groups, setGroups] = useState<any[]>([]);
-//   const fetchGroups = async () => {
-//     // Only fetch if we have the required data
-//     if (!user?.email || !jwtToken) return;
-
-//     try {
-//       const response = await groupService.getAll(user.email, jwtToken);
-//       if (response) {
-//         setGroups(response);
-//       }
-//     } catch (err) {
-//       toast.error((err as any).response?.data?.message || "Failed to fetch groups");
-//     }
-//   };
-//   useEffect(() => {
-//   fetchGroups(); // Execute it
-// }, []);
-//   return (
-//     <Grid size={12} width={'95%'} ml={2} mt={2}>
-//       <MenuList>
-//         {groups.map((group) => (
-//           <>
-//           <MenuItem key={group.id} onClick={() => navigate(`/groups/${group.id}`)}>
-//             <ListItemText>{group.groupName}</ListItemText>
-//           </MenuItem>
-//           <Divider />
-//           </>
-//         ))}
-//       </MenuList>
-//       <Button variant="outlined" onClick={()=>navigate('/newGroup')}>Add New</Button>
-//     </Grid>
-//   );
-// };
-
-// export default GroupsPage;
-
 import {
   Button,
   Divider,
@@ -66,6 +12,7 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -74,6 +21,7 @@ import groupService from "../../services/groupService";
 import { useAuth } from "../../context/Authentication/useAuth";
 
 const categories = ["Household", "Trip", "Event", "Project", "Other"];
+
 
 const GroupsPage = () => {
   const navigate = useNavigate();
@@ -84,6 +32,8 @@ const GroupsPage = () => {
   const [open, setOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ groupName: "", category: "" });
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
 
   const fetchGroups = async () => {
     if (!user?.email || !jwtToken) return;
@@ -143,69 +93,77 @@ const GroupsPage = () => {
     }
   };
 
-  return (
-    <Grid size={12} width={"95%"} ml={2} mt={2}>
-      {/* <MenuList>
-        {groups.map((group) => {
-          const groupId = group.id ?? group.groupId;
 
-          return (
-            <div key={groupId}>
+  const handleOpenDelete = (group: any) => {
+    setDeleteTarget(group);
+    setDeleteOpen(true);
+  };
+
+  const handleCloseDelete = () => {
+    setDeleteOpen(false);
+    setDeleteTarget(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget?.groupId) {
+      toast.error("Missing groupId");
+      return;
+    }
+    if (!user?.email || !jwtToken) return;
+
+    try {
+      await groupService.deleteGroup(deleteTarget.groupId, jwtToken, user.email);
+      toast.success("Group deleted");
+      handleCloseDelete();
+      fetchGroups();
+    } catch (err) {
+      toast.error((err as any).response?.data?.message || "Failed to delete group");
+    }
+  };
+
+  return (
+  <Grid size={12} width={"95%"} ml={2} mt={2}>
+
+      <MenuList>
+          {groups.map((group) => (
+            <div key={group.groupId}>
               <MenuItem
-                onClick={() => navigate(`/groups/${groupId}`)}
+                onClick={() => navigate(`/groups/${group.groupId}`)}
                 sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
               >
-                <ListItemText
-                  primary={group.groupName}
-                  secondary={group.category}
-                />
+                <ListItemText primary={group.groupName} secondary={group.category} />
 
+                {/* Put the conditional pencil icon here */}
                 {group.isAdmin === true && (
-                  <IconButton
-                    edge="end"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenEdit(group);
-                    }}
-                    aria-label="edit-group"
-                  >
-                    <EditOutlinedIcon />
-                  </IconButton>
+                  <>
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEdit(group);
+                      }}
+                      aria-label="edit-group"
+                    >
+                      <EditOutlinedIcon />
+                    </IconButton>
+
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDelete(group);
+                      }}
+                      aria-label="delete-group"
+                    >
+                      <DeleteOutlineIcon />
+                    </IconButton>
+                  </>
                 )}
               </MenuItem>
               <Divider />
             </div>
-          );
-        })}
-      </MenuList> */}
-
-      <MenuList>
-  {groups.map((group) => (
-    <div key={group.groupId}>
-      <MenuItem
-        onClick={() => navigate(`/groups/${group.groupId}`)}
-        sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
-        <ListItemText primary={group.groupName} secondary={group.category} />
-
-        {/* Put the conditional pencil icon here */}
-        {group.isAdmin === true && (
-          <IconButton
-            edge="end"
-            onClick={(e) => {
-              e.stopPropagation(); // stops navigation
-              handleOpenEdit(group); // opens popup
-            }}
-            aria-label="edit-group"
-          >
-            <EditOutlinedIcon />
-          </IconButton>
-        )}
-      </MenuItem>
-      <Divider />
-    </div>
-  ))}
-</MenuList>
+          ))}
+      </MenuList>
 
       <Button variant="outlined" onClick={() => navigate("/newGroup")}>
         Add New
@@ -252,6 +210,22 @@ const GroupsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete dialog */}
+      <Dialog open={deleteOpen} onClose={handleCloseDelete} fullWidth maxWidth="xs">
+        <DialogTitle>Delete group</DialogTitle>
+        <DialogContent>
+          This will permanently delete{" "}
+          <strong>{deleteTarget?.groupName ?? "this group"}</strong> and its memberships.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelete}>Cancel</Button>
+          <Button variant="contained" onClick={handleConfirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Grid>
   );
 };

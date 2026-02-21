@@ -33,6 +33,16 @@ class GroupService {
     return response.data;
   }
 
+  async deleteGroup(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.delete(`/group/${groupId}`, {
+      params: { requesterEmail },
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
+
   getToken() {
     return localStorage.getItem(TOKEN_KEY);
   }
