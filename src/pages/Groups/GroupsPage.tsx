@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -33,6 +34,8 @@ const GroupsPage = () => {
   const [editForm, setEditForm] = useState({ groupName: "", category: "" });
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<any | null>(null);
 
   const fetchGroups = async () => {
     if (!user?.email || !jwtToken) return;
@@ -51,6 +54,36 @@ const GroupsPage = () => {
     fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleOpenArchive = (group: any) => {
+    setArchiveTarget(group);
+    setArchiveOpen(true);
+  };
+
+  const handleCloseArchive = () => {
+    setArchiveOpen(false);
+    setArchiveTarget(null);
+  };
+
+  const handleConfirmArchive = async () => {
+    if (!archiveTarget?.groupId) return;
+    if (!user?.email || !jwtToken) return;
+
+    try {
+      await groupService.archiveGroup(
+        archiveTarget.groupId,
+        jwtToken,
+        user.email,
+      );
+      toast.success("Group archived");
+      handleCloseArchive();
+      fetchGroups();
+    } catch (err) {
+      toast.error(
+        (err as any).response?.data?.message || "Failed to archive group",
+      );
+    }
+  };
 
   const handleOpenEdit = (group: any) => {
     setSelectedGroup(group);
@@ -163,6 +196,28 @@ const GroupsPage = () => {
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleOpenArchive(group);
+                    }}
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "warning.main",
+                      borderRadius: "8px",
+                      color: "warning.main",
+                      ml: 1,
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: "warning.main",
+                        color: "white",
+                      },
+                    }}
+                    aria-label="archive-group"
+                  >
+                    <ArchiveOutlinedIcon />
+                  </IconButton>
+
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleOpenEdit(group);
                     }}
                     sx={{
@@ -216,10 +271,27 @@ const GroupsPage = () => {
       </Button>
 
       {/* Edit dialog */}
-      {/* <Dialog open={open} onClose={handleCloseEdit} fullWidth maxWidth="sm">
-        <DialogTitle>Edit group</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={handleCloseEdit}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            p: 1,
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Group</DialogTitle>
+
         <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            mt: 1,
+          }}
         >
           <TextField
             label="Group Name"
@@ -227,7 +299,6 @@ const GroupsPage = () => {
             value={editForm.groupName}
             onChange={handleEditChange}
             fullWidth
-            required
           />
 
           <TextField
@@ -237,7 +308,6 @@ const GroupsPage = () => {
             value={editForm.category}
             onChange={handleEditChange}
             fullWidth
-            required
           >
             {categories.map((option) => (
               <MenuItem key={option} value={option}>
@@ -247,167 +317,113 @@ const GroupsPage = () => {
           </TextField>
         </DialogContent>
 
-        <DialogActions>
+        {/* edit dialog */}
+        <DialogActions sx={{ pb: 2, pr: 3 }}>
           <Button onClick={handleCloseEdit}>Cancel</Button>
           <Button
-            onClick={handleSaveEdit}
             variant="contained"
-            disabled={!editForm.groupName || !editForm.category}
+            onClick={handleSaveEdit}
+            sx={{
+              borderRadius: "8px",
+              px: 3,
+              fontWeight: 600,
+            }}
           >
-            Save
+            Save Changes
           </Button>
         </DialogActions>
-      </Dialog> */}
+      </Dialog>
 
-<Dialog
-  open={open}
-  onClose={handleCloseEdit}
-  fullWidth
-  maxWidth="sm"
-  PaperProps={{
-    sx: {
-      borderRadius: "16px",
-      p: 1,
-    },
-  }}
->
-  <DialogTitle sx={{ fontWeight: 700 }}>
-    Edit Group
-  </DialogTitle>
-
-  <DialogContent
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 3,
-      mt: 1,
-    }}
-  >
-    <TextField
-      label="Group Name"
-      name="groupName"
-      value={editForm.groupName}
-      onChange={handleEditChange}
-      fullWidth
-    />
-
-    <TextField
-      select
-      label="Category"
-      name="category"
-      value={editForm.category}
-      onChange={handleEditChange}
-      fullWidth
-    >
-      {categories.map((option) => (
-        <MenuItem key={option} value={option}>
-          {option}
-        </MenuItem>
-      ))}
-    </TextField>
-  </DialogContent>
-
-  <DialogActions sx={{ pb: 2, pr: 3 }}>
-    <Button onClick={handleCloseEdit}>Cancel</Button>
-    <Button
-      variant="contained"
-      onClick={handleSaveEdit}
-      sx={{
-        borderRadius: "8px",
-        px: 3,
-        fontWeight: 600,
-      }}
-    >
-      Save Changes
-    </Button>
-  </DialogActions>
-</Dialog>
-
-
-
-
-
-
-
-
+      {/* archive dialog */}
+      <Dialog
+        open={archiveOpen}
+        onClose={handleCloseArchive}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: "16px", p: 1 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: "warning.main" }}>
+          Archive Group
+        </DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <div style={{ fontSize: "14px", color: "#555" }}>Archive</div>
+          <div style={{ fontWeight: 800, fontSize: "16px", marginTop: "6px" }}>
+            {archiveTarget?.groupName}
+          </div>
+          <div style={{ marginTop: "10px", fontSize: "13px", color: "#777" }}>
+            You can restore it later from Archived Groups.
+          </div>
+        </DialogContent>
+        <DialogActions sx={{ pb: 2, pr: 3 }}>
+          <Button onClick={handleCloseArchive}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleConfirmArchive}
+            sx={{
+              borderRadius: "8px",
+              px: 3,
+              fontWeight: 700,
+              backgroundColor: "warning.main",
+            }}
+          >
+            Archive
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Delete dialog */}
-      {/* <Dialog
+      <Dialog
         open={deleteOpen}
         onClose={handleCloseDelete}
         fullWidth
         maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            p: 1,
+          },
+        }}
       >
-        <DialogTitle>Delete group</DialogTitle>
-        <DialogContent>
-          This will permanently delete{" "}
-          <strong>{deleteTarget?.groupName ?? "this group"}</strong> and its
-          memberships.
+        <DialogTitle sx={{ fontWeight: 700, color: "error.main" }}>
+          Delete Group
+        </DialogTitle>
+
+        <DialogContent sx={{ mt: 1 }}>
+          <div style={{ fontSize: "14px", color: "#555" }}>
+            You are about to permanently delete
+          </div>
+
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "16px",
+              marginTop: "6px",
+            }}
+          >
+            {deleteTarget?.groupName}
+          </div>
+
+          <div style={{ marginTop: "10px", fontSize: "13px", color: "#777" }}>
+            This action cannot be undone.
+          </div>
         </DialogContent>
-        <DialogActions>
+
+        <DialogActions sx={{ pb: 2, pr: 3 }}>
           <Button onClick={handleCloseDelete}>Cancel</Button>
-          <Button variant="contained" onClick={handleConfirmDelete}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDelete}
+            sx={{
+              borderRadius: "8px",
+              px: 3,
+              fontWeight: 600,
+            }}
+          >
             Delete
           </Button>
         </DialogActions>
-      </Dialog> */}
-
-      <Dialog
-  open={deleteOpen}
-  onClose={handleCloseDelete}
-  fullWidth
-  maxWidth="xs"
-  PaperProps={{
-    sx: {
-      borderRadius: "16px",
-      p: 1,
-    },
-  }}
->
-  <DialogTitle sx={{ fontWeight: 700, color: "error.main" }}>
-    Delete Group
-  </DialogTitle>
-
-  <DialogContent sx={{ mt: 1 }}>
-    <div style={{ fontSize: "14px", color: "#555" }}>
-      You are about to permanently delete
-    </div>
-
-    <div
-      style={{
-        fontWeight: 700,
-        fontSize: "16px",
-        marginTop: "6px",
-      }}
-    >
-      {deleteTarget?.groupName}
-    </div>
-
-    <div style={{ marginTop: "10px", fontSize: "13px", color: "#777" }}>
-      This action cannot be undone.
-    </div>
-  </DialogContent>
-
-  <DialogActions sx={{ pb: 2, pr: 3 }}>
-    <Button onClick={handleCloseDelete}>Cancel</Button>
-    <Button
-      variant="contained"
-      color="error"
-      onClick={handleConfirmDelete}
-      sx={{
-        borderRadius: "8px",
-        px: 3,
-        fontWeight: 600,
-      }}
-    >
-      Delete
-    </Button>
-  </DialogActions>
-</Dialog>
-
-
-
-
+      </Dialog>
     </Grid>
   );
 };

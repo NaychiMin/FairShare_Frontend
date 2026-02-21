@@ -10,6 +10,7 @@ import DashboardPage from './pages/Dashboard/DashboardPage';
 import ProtectedRoute from './context/Authentication/ProtectedRoute';
 import ProfilePage from './pages/Profile/ProfilePage';
 import GroupsPage from './pages/Groups/GroupsPage';
+import ArchivedGroupsPage from './pages/Groups/ArchivedGroupsPage';
 import CreateGroupForm from './pages/Groups/NewGroup';
 
 function App() {
@@ -31,9 +32,10 @@ function App() {
             <Route path="groups" element={<GroupsPage />} />
             <Route path="newGroup" element={<CreateGroupForm />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="archived-groups" element={<ArchivedGroupsPage />} />
           </Route>
         </Route>
-      </Routes>
+      </Routes>-
     </>
   )
 }
