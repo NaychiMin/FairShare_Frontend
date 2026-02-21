@@ -22,6 +22,17 @@ class GroupService {
     return response.data;
   }
 
+  async updateGroup(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(`/group/${groupId}`, data, {
+      params: { requesterEmail }, // matches your controller @RequestParam
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  }
+
   getToken() {
     return localStorage.getItem(TOKEN_KEY);
   }
