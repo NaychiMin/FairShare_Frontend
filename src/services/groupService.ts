@@ -71,6 +71,28 @@ class GroupService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  // Get group details to be displayed on group page
+  async getGroupById(groupId: string, jwtToken: string, userEmail: string) {
+    const response = await axios.get(`/group/${groupId}`, {
+      params: { requesterEmail: userEmail }, 
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
+
+  // Get group members to be displayed on group page
+  async getGroupMembers(groupId: string, jwtToken: string, userEmail: string) {
+    const response = await axios.get(`/group/${groupId}/members`, {
+      params: { requesterEmail: userEmail }, 
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
+
 }
 
 export default new GroupService();
