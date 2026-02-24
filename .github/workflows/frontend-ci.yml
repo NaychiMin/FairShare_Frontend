@@ -91,7 +91,12 @@ jobs:
     - name: Run OWASP ZAP Full Scan Action
       uses: zaproxy/action-full-scan@v0.13.0
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         target: "http://localhost:5173"
         cmd_options: "-d"           
         fail_action: true
+
+    - name: Upload ZAP Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: zap-report
+        path: zap_report.html
