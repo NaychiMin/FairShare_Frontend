@@ -91,7 +91,7 @@ jobs:
     - name: Run OWASP ZAP Full Scan Action
       uses: zaproxy/action-full-scan@v0.13.0
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.ZAP_PAT }}
         target: "http://localhost:5173"
         cmd_options: "-I -d"           
         fail_action: false
