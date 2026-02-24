@@ -82,13 +82,13 @@ jobs:
 
     - name: Start frontend
       run: |
-        npm run start &       # run in background
-        npx wait-on http://localhost:3000  # wait for server to be ready
+        npm run dev &                  # run dev server in background
+        npx wait-on http://localhost:5173   # wait for server to be ready
 
     - name: Run OWASP ZAP Full Scan Action
       uses: zaproxy/action-full-scan@v0.13.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        target: "http://localhost:3000"
+        target: "http://localhost:5173"
         cmd_options: "-d"           
         fail_action: true
