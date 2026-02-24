@@ -88,16 +88,10 @@ jobs:
         npm run dev &                  # run dev server in background
         npx wait-on http://localhost:5173   # wait for server to be ready
 
-    - name: Run OWASP ZAP Full Scan Action
-      uses: zaproxy/action-full-scan@v0.13.0
-      with:
-        token: ""
-        target: "http://localhost:5173"
-        cmd_options: "-I -d"          
-        fail_action: true
-
-    - name: Upload ZAP Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: zap-report
-        path: zap_report.html
+    - name: Run ZAP in Docker
+      run: |
+        docker run --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-full-scan.py \
+          -t http://localhost:5173 \
+          -r zap_report.html \
+          -I \
+          -d
