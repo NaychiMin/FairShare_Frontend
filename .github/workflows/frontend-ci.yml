@@ -88,9 +88,10 @@ jobs:
         npm run dev &                  # run dev server in background
         npx wait-on http://localhost:5173   # wait for server to be ready
 
-    - name: Run ZAP in Docker
+    - name: Run ZAP in Docker (report-only)
       run: |
-        docker run --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-full-scan.py \
+        docker run --network="host" --rm -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-weekly \
+          zap-full-scan.py \
           -t http://localhost:5173 \
           -r zap_report.html \
           -I \
