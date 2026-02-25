@@ -17,7 +17,7 @@ RUN npm run build
 
 
 # ---------- Stage 2: Serve ----------
-FROM nginx:alpine
+FROM nginx
 
 # Remove default nginx static files
 RUN rm -rf /usr/share/nginx/html/*
