@@ -3,29 +3,49 @@ import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { TextField, Button, Box, Typography, Alert, Dialog, DialogActions, DialogContent } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { type RegisterFormInputs } from "./index.types";
 import authService from "../../../services/authService";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import "../authentication.css"
+import "../authentication.css";
 
-const schema = yup.object({
-  name: yup.string().required("Name required"),
-  email: yup.string().email("Invalid email").required("Email required"),
-  password: yup.string().min(6, "Password must be at least 6 chars").required("Password required"),
-  password2: yup.string()
-     .oneOf([yup.ref("password")], "Passwords must match")
-     .required("Confirm your password")
-}).required();
+const schema = yup
+  .object({
+    name: yup.string().required("Name required"),
+    email: yup.string().email("Invalid email").required("Email required"),
+    password: yup
+      .string()
+      .min(6, "Password must be at least 6 chars")
+      .required("Password required"),
+    password2: yup
+      .string()
+      .oneOf([yup.ref("password")], "Passwords must match")
+      .required("Confirm your password"),
+  })
+  .required();
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormInputs>({
-    resolver: yupResolver(schema)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInputs>({
+    resolver: yupResolver(schema),
   });
-  const errorMessageDefault = "Unable to register at this time. Please try again later."
+  const errorMessageDefault =
+    "Unable to register at this time. Please try again later.";
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
@@ -52,14 +72,21 @@ const RegisterPage = () => {
 
   const handleClose = () => {
     setSuccess(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <div className="auth-body">
       <div>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: 400, mx: "auto" }} autoComplete="off">
-          <Typography variant="h5" mb={2}>Getting Started</Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ width: 400, mx: "auto" }}
+          autoComplete="off"
+        >
+          <Typography variant="h5" mb={2}>
+            Getting Started
+          </Typography>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -104,12 +131,27 @@ const RegisterPage = () => {
             helperText={errors.password2?.message}
             disabled={loading}
           />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={loading}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+            disabled={loading}
+          >
             Sign Up
           </Button>
-          <Button startIcon={<ArrowBackIcon />} variant="text" color="primary" fullWidth sx={{ mt: 2 }} disabled={loading} onClick={() => navigate('/login')}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            variant="text"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+            disabled={loading}
+            onClick={() => navigate("/login")}
+          >
             Return to Log In
-          </Button> 
+          </Button>
         </Box>
         <Dialog
           open={success}

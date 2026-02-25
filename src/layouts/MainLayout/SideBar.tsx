@@ -9,7 +9,7 @@ const SideBar = ({
   isMobile,
   mobileOpen,
   collapsed,
-  onClose
+  onClose,
 }: SideBarProps) => {
   const drawerContent = (
     <Box sx={{ p: 2 }}>
@@ -25,7 +25,7 @@ const SideBar = ({
         onClose={onClose}
         ModalProps={{ keepMounted: true }}
         sx={{
-          "& .MuiDrawer-paper": { width: DRAWER_WIDTH }
+          "& .MuiDrawer-paper": { width: DRAWER_WIDTH },
         }}
       >
         {drawerContent}
@@ -44,7 +44,7 @@ const SideBar = ({
           overflowX: "hidden",
           transition: "width 0.3s",
           zIndex: 1000,
-        }
+        },
       }}
     >
       <Toolbar />

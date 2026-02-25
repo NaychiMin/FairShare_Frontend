@@ -6,7 +6,6 @@ import type { ProfileFormInputs } from "../pages/Profile/ProfilePage";
 const TOKEN_KEY = "token";
 
 class AuthService {
-  
   async login(data: LoginFormInputs) {
     const response = await axios.post("/auth/login", data);
 
@@ -23,14 +22,14 @@ class AuthService {
 
   async update(data: ProfileFormInputs, userId: string, jwtToken: string) {
     const response = await axios.put(`/user/${userId}`, data, {
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   }
-  
+
   logout() {
     localStorage.removeItem(TOKEN_KEY);
   }

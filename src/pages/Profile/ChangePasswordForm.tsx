@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-  TextField,
-  Button,
-  Stack,
-} from "@mui/material";
+import { TextField, Button, Stack } from "@mui/material";
 
 type ChangePasswordInputs = {
   oldPassword: string;
@@ -16,8 +12,14 @@ type ChangePasswordInputs = {
 
 const passwordSchema = yup.object({
   oldPassword: yup.string().required("Old password is required"),
-  password: yup.string().required("New password is required").min(6, "Password must be at least 6 characters"),
-  password2: yup.string().required("Please confirm password").oneOf([yup.ref("password")], "Passwords must match"),
+  password: yup
+    .string()
+    .required("New password is required")
+    .min(6, "Password must be at least 6 characters"),
+  password2: yup
+    .string()
+    .required("Please confirm password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
 const ChangePasswordForm: React.FC = () => {

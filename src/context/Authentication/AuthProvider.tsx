@@ -4,12 +4,14 @@ import { AuthContext } from "./AuthContext";
 import type { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { navigate } = useNavigate();
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
-    authService.isAuthenticated()
+    authService.isAuthenticated(),
   );
 
   const login = async (email: string, password: string) => {
@@ -34,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("token");
     setIsAuthenticated(false);
 
-    navigate('/login');
+    navigate("/login");
   };
 
   return (

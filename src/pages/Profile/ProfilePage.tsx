@@ -39,8 +39,9 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const errorMessageDefault = "Unable to update profile at this time. Please try again later."
-  
+  const errorMessageDefault =
+    "Unable to update profile at this time. Please try again later.";
+
   const {
     handleSubmit,
     control,
@@ -62,7 +63,7 @@ const ProfilePage: React.FC = () => {
     event: React.SyntheticEvent | Event,
     reason?: SnackbarCloseReason,
   ) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setSuccess(false);
@@ -73,10 +74,14 @@ const ProfilePage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await authService.update(data, user?.userId || "nil", jwtToken || "");
+      const response = await authService.update(
+        data,
+        user?.userId || "nil",
+        jwtToken || "",
+      );
       if (response.user) {
         updateUser(response.user);
-        toast.success("Successfully updated profile.")
+        toast.success("Successfully updated profile.");
       }
     } catch (err) {
       console.error(error);
@@ -127,7 +132,11 @@ const ProfilePage: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <Tabs value={value} onChange={handleChange} sx={{ marginBottom: "1rem" }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          sx={{ marginBottom: "1rem" }}
+        >
           <Tab value="profile" label="Profile" />
           <Tab value="password" label="Change Password" />
           <Tab value="other" label="Other Settings" />
@@ -189,7 +198,7 @@ const ProfilePage: React.FC = () => {
               </Stack>
             </form>
           ) : value === "password" ? (
-            <ChangePasswordForm/>
+            <ChangePasswordForm />
           ) : (
             <></>
           )}

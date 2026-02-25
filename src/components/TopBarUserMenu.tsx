@@ -1,5 +1,5 @@
 import { IconButton, Menu, MenuItem, Typography } from "@mui/material";
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { useState } from "react";
 import { useAuth } from "../context/Authentication/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -18,15 +18,17 @@ const TopBarUserMenu = () => {
   };
   const routeToProfile = () => {
     setAnchorEl(null);
-    navigate('/profile');
-  }
+    navigate("/profile");
+  };
   const handleLogout = () => {
     setAnchorEl(null);
     logout();
   };
   return (
     <div className="flex items-center">
-      <Typography><b>{user?.name}</b></Typography>
+      <Typography>
+        <b>{user?.name}</b>
+      </Typography>
       <IconButton color="inherit" onClick={handleClick}>
         <PersonOutlineIcon />
       </IconButton>
@@ -37,7 +39,7 @@ const TopBarUserMenu = () => {
         onClose={handleClose}
         slotProps={{
           list: {
-            'aria-labelledby': 'basic-button',
+            "aria-labelledby": "basic-button",
           },
         }}
       >
@@ -45,7 +47,7 @@ const TopBarUserMenu = () => {
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
-  )
-}
+  );
+};
 
 export default TopBarUserMenu;
