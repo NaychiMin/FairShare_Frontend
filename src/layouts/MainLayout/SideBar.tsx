@@ -1,4 +1,3 @@
-import React from "react";
 import { Drawer, Box, Typography, Toolbar } from "@mui/material";
 import type { SideBarProps } from "./index.types";
 

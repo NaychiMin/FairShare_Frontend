@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { navigate } = useNavigate();
+  const navigate = useNavigate();
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
