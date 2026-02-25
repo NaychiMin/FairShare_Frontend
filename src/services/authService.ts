@@ -1,6 +1,7 @@
 import axios from "../api/axios";
 import type { LoginFormInputs } from "../pages/Authentication/LoginPage/index.types";
 import type { RegisterFormInputs } from "../pages/Authentication/RegisterPage/index.types";
+import type { ChangePasswordInputs } from "../pages/Profile/ChangePasswordForm";
 import type { ProfileFormInputs } from "../pages/Profile/ProfilePage";
 
 const TOKEN_KEY = "token";
@@ -22,6 +23,16 @@ class AuthService {
 
   async update(data: ProfileFormInputs, userId: string, jwtToken: string) {
     const response = await axios.put(`/user/${userId}`, data, {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  }
+
+  async updatePassword(data: ChangePasswordInputs, userId: string, jwtToken: string) {
+    const response = await axios.put(`/user/${userId}/update-password`, data, {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
         "Content-Type": "application/json",

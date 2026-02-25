@@ -84,7 +84,7 @@ const ProfilePage: React.FC = () => {
         toast.success("Successfully updated profile.");
       }
     } catch (err) {
-      console.error(error);
+      console.error(err);
       if (err instanceof AxiosError) {
         setError(err.response?.data?.message || errorMessageDefault);
       } else {

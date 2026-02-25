@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { TextField, Button, Stack } from "@mui/material";
+import { TextField, Button, Stack, Alert } from "@mui/material";
+import authService from "../../services/authService";
+import { useAuth } from "../../context/Authentication/useAuth";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 
-type ChangePasswordInputs = {
+export type ChangePasswordInputs = {
   oldPassword: string;
   password: string;
   password2: string;
@@ -23,24 +27,47 @@ const passwordSchema = yup.object({
 });
 
 const ChangePasswordForm: React.FC = () => {
+  const { user, jwtToken } = useAuth();
+  
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const errorMessageDefault =
+    "Unable to update profile at this time. Please try again later.";
+
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<ChangePasswordInputs>({
     resolver: yupResolver(passwordSchema),
+    defaultValues: {
+      oldPassword: "",
+      password: "",
+      password2: "",
+    },
   });
 
   const onSubmit: SubmitHandler<ChangePasswordInputs> = async (data) => {
     setLoading(true);
+    setError(null);
+
     try {
-      console.log("Profile data to save:", data);
-      // TODO: Replace with API call to save profile
-      alert("Profile updated successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update profile");
+      await authService.updatePassword(
+        data,
+        user?.userId || "nil",
+        jwtToken || "",
+      );
+      toast.success("Successfully updated password.");
+      reset();
+    } catch (err) {
+      console.error(err);
+      if (err instanceof AxiosError) {
+        setError(err.response?.data?.message || errorMessageDefault);
+      } else {
+        setError(errorMessageDefault);
+      }
     } finally {
       setLoading(false);
     }
@@ -49,6 +76,11 @@ const ChangePasswordForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
         <Controller
           name="oldPassword"
           control={control}
@@ -56,6 +88,7 @@ const ChangePasswordForm: React.FC = () => {
             <TextField
               {...field}
               label="Old Password"
+              type="password"
               fullWidth
               error={!!errors.oldPassword}
               helperText={errors.oldPassword?.message}
@@ -71,6 +104,7 @@ const ChangePasswordForm: React.FC = () => {
             <TextField
               {...field}
               label="New Password"
+              type="password"
               fullWidth
               error={!!errors.password}
               helperText={errors.password?.message}
@@ -86,6 +120,7 @@ const ChangePasswordForm: React.FC = () => {
             <TextField
               {...field}
               label="Confirm New Password"
+              type="password"
               fullWidth
               error={!!errors.password2}
               helperText={errors.password2?.message}
