@@ -12,6 +12,7 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
@@ -36,6 +37,10 @@ const GroupsPage = () => {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiveTarget, setArchiveTarget] = useState<any | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteTarget, setInviteTarget] = useState<any | null>(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [generatedLink, setGeneratedLink] = useState("");
 
   const fetchGroups = async () => {
     if (!user?.email || !jwtToken) return;
@@ -162,6 +167,60 @@ const GroupsPage = () => {
     }
   };
 
+  const handleOpenInvite = (group: any) => {
+    setInviteTarget(group);
+    setInviteEmail("");
+    setGeneratedLink("");
+    setInviteOpen(true);
+  };
+
+  const handleCloseInvite = () => {
+    setInviteOpen(false);
+    setInviteTarget(null);
+    setInviteEmail("");
+    setGeneratedLink("");
+  };
+
+  const handleCreateEmailInvite = async () => {
+    if (!inviteTarget?.groupId || !user?.email || !jwtToken) return;
+
+    try {
+      const response = await groupService.createInvite(
+        inviteTarget.groupId,
+        { invitedEmail: inviteEmail },
+        jwtToken,
+        user.email
+      );
+      toast.success("Invitation created");
+      setGeneratedLink(response.inviteLink);
+    } catch (err) {
+      toast.error((err as any).response?.data?.message || "Failed to create invitation");
+    }
+  };
+
+  const handleCreateLinkInvite = async () => {
+    if (!inviteTarget?.groupId || !user?.email || !jwtToken) return;
+
+    try {
+      const response = await groupService.createInvite(
+        inviteTarget.groupId,
+        { invitedEmail: null },
+        jwtToken,
+        user.email
+      );
+      toast.success("Invite link generated");
+      setGeneratedLink(response.inviteLink);
+    } catch (err) {
+      toast.error((err as any).response?.data?.message || "Failed to create invite link");
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!generatedLink) return;
+    await navigator.clipboard.writeText(generatedLink);
+    toast.success("Invite link copied");
+  };
+
   return (
     <Grid size={12} width={"95%"} ml={2} mt={2}>
       <MenuList>
@@ -193,6 +252,22 @@ const GroupsPage = () => {
               {/* Put the conditional pencil icon here */}
               {group.isAdmin === true && (
                 <>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenInvite(group);
+                    }}
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "success.main",
+                      borderRadius: "10px",
+                      color: "success.main",
+                      "&:hover": { backgroundColor: "success.main", color: "white" },
+                    }}
+                  >
+                    <PersonAddAltOutlinedIcon />
+                  </IconButton>
+
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
@@ -424,6 +499,69 @@ const GroupsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Invite dialog */}
+      <Dialog
+        open={inviteOpen}
+        onClose={handleCloseInvite}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ className: "rounded-2xl" }}
+      >
+        <div className="px-5 pt-5 pb-4">
+          <div className="text-lg font-extrabold text-gray-900">Invite to Group</div>
+          <div className="mt-1 text-sm text-gray-500">
+            Invite users by email or generate a shareable link.
+          </div>
+
+          <div className="mt-5 space-y-4">
+            <TextField
+              fullWidth
+              label="Invite by email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+
+            <div className="flex gap-2">
+              <Button
+                variant="contained"
+                onClick={handleCreateEmailInvite}
+                disabled={!inviteEmail}
+                sx={{ borderRadius: "12px", fontWeight: 700 }}
+              >
+                Send Invite
+              </Button>
+
+              <Button
+                variant="outlined"
+                onClick={handleCreateLinkInvite}
+                sx={{ borderRadius: "12px", fontWeight: 700 }}
+              >
+                Generate Link
+              </Button>
+            </div>
+
+            {generatedLink && (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="text-xs font-bold text-gray-600">Invite Link</div>
+                <div className="mt-1 break-all text-sm text-gray-800">{generatedLink}</div>
+                <Button
+                  variant="text"
+                  onClick={handleCopyLink}
+                  sx={{ mt: 1, px: 0, fontWeight: 700 }}
+                >
+                  Copy Link
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <Button onClick={handleCloseInvite}>Close</Button>
+          </div>
+        </div>
+      </Dialog>
+
     </Grid>
   );
 };

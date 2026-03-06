@@ -14,6 +14,9 @@ import ArchivedGroupsPage from './pages/Groups/ArchivedGroupsPage';
 import CreateGroupForm from './pages/Groups/NewGroup';
 import GroupDetailsPage from "./pages/Groups/GroupDetailsPage";
 import ExpenseDetails from "./pages/Expense/ExpenseDetails";
+import AcceptInvitePage from './pages/Groups/AcceptInvitePage';
+import PendingInvitesPage from './pages/Groups/PendingInvitesPage';
+import SentInvitesPage from './pages/Groups/SentInvitesPage';
 
 function App() {
 
@@ -26,8 +29,8 @@ function App() {
 
         <Route path="login" element={<LoginForm />} />
         <Route path="register" element={<RegisterForm />} />
-
-        
+        <Route path="groups/invite/accept" element={<AcceptInvitePage />} />
+ 
         <Route element={<ProtectedRoute />}> {/* routes that are login-protected */}
           <Route element={<MainLayout />}> {/* routes WITH MainLayout */}
             <Route path="dashboard" element={<DashboardPage />} />
@@ -37,6 +40,8 @@ function App() {
             <Route path="archived-groups" element={<ArchivedGroupsPage />} />
             <Route path="groups/:groupId" element={<GroupDetailsPage />} />
             <Route path="expenses/:expenseId" element={<ExpenseDetails />} />
+            <Route path="sent-invites" element={<SentInvitesPage />} />
+            <Route path="pending-invites" element={<PendingInvitesPage />} />
           </Route>
         </Route>
       </Routes>

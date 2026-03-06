@@ -26,23 +26,52 @@ const LoginPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-    setLoading(true);
-    setError("");
+  // const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+  //   setLoading(true);
+  //   setError("");
 
-    try {
-      await login(data.email, data.password);
+  //   try {
+  //     await login(data.email, data.password);
+  //     navigate("/dashboard");
+  //   } catch (err: unknown) {
+  //     if (err instanceof AxiosError) {
+  //       setError(err.response?.data?.message || errorMessageDefault);
+  //     } else {
+  //       setError(errorMessageDefault);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+  
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+  setLoading(true);
+  setError("");
+
+  try {
+    await login(data.email, data.password);
+
+    const redirectPath = sessionStorage.getItem("pendingInviteRedirect");
+
+    if (redirectPath) {
+      sessionStorage.removeItem("pendingInviteRedirect");
+      navigate(redirectPath);
+    } else {
       navigate("/dashboard");
-    } catch (err: unknown) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || errorMessageDefault);
-      } else {
-        setError(errorMessageDefault);
-      }
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err: unknown) {
+    if (err instanceof AxiosError) {
+      setError(err.response?.data?.message || errorMessageDefault);
+    } else {
+      setError(errorMessageDefault);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+  
+  
   return (
     <div className="auth-body">
       <div>
