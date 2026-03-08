@@ -211,4 +211,4 @@ const ExpenseDetails: React.FC = () => {
   );
 };
 
-export default ExpenseDetails;  {}
+export default ExpenseDetails;

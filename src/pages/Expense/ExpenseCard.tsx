@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  Card,
-  CardContent,
   Typography,
   Box,
   Chip,
@@ -103,4 +101,4 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense }) => {
   );
 };
 
-export default ExpenseCard; {}
+export default ExpenseCard;

@@ -12,24 +12,20 @@ import {
   Tab,
   Skeleton,
   Alert,
-  IconButton,
-  Menu,
-  MenuItem,
-  Divider
+  IconButton
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
   Add as AddIcon,
-  MoreVert as MoreIcon,
   People as PeopleIcon,
-  Receipt as ReceiptIcon,
-  Settings as SettingsIcon
+  Receipt as ReceiptIcon
 } from '@mui/icons-material';
 import groupService from '../../services/groupService';
 import expenseService from '../../services/expenseService';
 import ExpenseCard from '../Expense/ExpenseCard';
 import ExpenseForm from '../Expense/ExpenseForm';
 import { useAuth } from '../../context/Authentication/useAuth';
+import type { Expense } from "../../types/Expense";
 
 interface Group {
   groupId: string;
@@ -73,12 +69,11 @@ const GroupDetailsPage: React.FC = () => {
   
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     if (groupId && jwtToken && user?.email) { 
@@ -121,14 +116,6 @@ const GroupDetailsPage: React.FC = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-  };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
   };
 
   const handleExpenseCreated = () => {

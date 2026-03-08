@@ -1,10 +1,11 @@
 import axios from "../api/axios";
+import type { CreateExpenseRequest } from "../types/Expense";
 const TOKEN_KEY = "token";
 
 class ExpenseService {
 
   // Create a new expense
-  async createExpense(data: any, jwtToken: string, userEmail: string) {
+  async createExpense(data: CreateExpenseRequest, jwtToken: string, userEmail: string) {
     const response = await axios.post(`/expenses`, data, {
       params: { requesterEmail: userEmail },
       headers: {
