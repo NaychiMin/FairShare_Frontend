@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -26,6 +26,7 @@ import ExpenseCard from '../Expense/ExpenseCard';
 import ExpenseForm from '../Expense/ExpenseForm';
 import { useAuth } from '../../context/Authentication/useAuth';
 import type { Expense } from "../../types/Expense";
+import type { User } from '../../types/User';
 
 interface Group {
   groupId: string;
@@ -75,15 +76,7 @@ const GroupDetailsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
 
-  useEffect(() => {
-    if (groupId && jwtToken && user?.email) { 
-      fetchGroupDetails();
-      fetchGroupExpenses();
-      fetchGroupMembers();
-    }
-  }, [groupId, jwtToken, user]);
-
-  const fetchGroupDetails = async () => {
+  const fetchGroupDetails = useCallback(async () => {
     try {
       // Pass user email to the service
       const data = await groupService.getGroupById(groupId!, jwtToken!, user!.email);
@@ -92,18 +85,18 @@ const GroupDetailsPage: React.FC = () => {
       console.error('Failed to fetch group:', err);
       setError('Failed to load group details');
     }
-  };
+  }, [groupId, jwtToken, user]);
 
-  const fetchGroupMembers = async () => {
+  const fetchGroupMembers = useCallback(async () => {
     try {
       const data = await groupService.getGroupMembers(groupId!, jwtToken!, user!.email);
       setMembers(data);
     } catch (err) {
       console.error('Failed to fetch members:', err);
     }
-  };
+  }, [groupId, jwtToken, user]);
 
-  const fetchGroupExpenses = async () => {
+  const fetchGroupExpenses = useCallback(async () => {
     try {
       const data = await expenseService.getGroupExpenses(groupId!, jwtToken!, user!.email);
       setExpenses(data);
@@ -112,7 +105,15 @@ const GroupDetailsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupId, jwtToken, user]);
+
+    useEffect(() => {
+    if (groupId && jwtToken && user?.email) { 
+      fetchGroupDetails();
+      fetchGroupExpenses();
+      fetchGroupMembers();
+    }
+  }, [groupId, jwtToken, user, fetchGroupDetails, fetchGroupExpenses, fetchGroupMembers]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
