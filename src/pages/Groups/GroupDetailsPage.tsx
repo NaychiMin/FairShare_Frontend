@@ -99,6 +99,7 @@ const GroupDetailsPage: React.FC = () => {
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
   const [settlementFormOpen, setSettlementFormOpen] = useState(false); 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
 
   const fetchGroupDetails = async () => {
     try {
@@ -281,7 +282,7 @@ const GroupDetailsPage: React.FC = () => {
         {expenses.length > 0 ? (
           <Box>
             {expenses.map((expense) => (
-              <ExpenseCard key={expense.expenseId} expense={expense} />
+              <ExpenseCard key={expense.expenseId} expense={expense} setExpenseFormOpen={setExpenseFormOpen} setEditingExpense={setEditingExpense} />
             ))}
           </Box>
         ) : (
@@ -389,10 +390,11 @@ const GroupDetailsPage: React.FC = () => {
       {groupId && (
         <ExpenseForm
           open={expenseFormOpen}
-          onClose={() => setExpenseFormOpen(false)}
+          onClose={() => {setExpenseFormOpen(false); setEditingExpense(null);}}
           groupId={groupId}
           groupName={group.groupName}
           members={members}
+          expenseToEdit={editingExpense}
           onExpenseCreated={handleExpenseCreated}
         />
       )}
