@@ -14,6 +14,16 @@ class ExpenseService {
     return response.data;
   }
 
+  async updateExpense(data: any, jwtToken: string, userEmail: string) {
+    const response = await axios.put(`/expenses/${data.expenseId}`, data, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+    });
+    return response.data;
+  }
+
   // Get expense by ID
   async getExpenseById(expenseId: string, jwtToken: string, userEmail: string) {
     const response = await axios.get(`/expenses/${expenseId}`, {
@@ -28,6 +38,16 @@ class ExpenseService {
   // Get all expenses for a group
   async getGroupExpenses(groupId: string, jwtToken: string, userEmail: string) {
     const response = await axios.get(`/expenses/group/${groupId}`, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
+
+  async deleteExpense(expenseId: string, jwtToken: string, userEmail: string) {
+    const response = await axios.delete(`/expenses/${expenseId}`, {
       params: { requesterEmail: userEmail },
       headers: {
         'Authorization': `Bearer ${jwtToken}`,

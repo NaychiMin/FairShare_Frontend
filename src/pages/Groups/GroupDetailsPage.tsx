@@ -79,6 +79,7 @@ const GroupDetailsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
 
   useEffect(() => {
     if (groupId && jwtToken && user?.email) { 
@@ -211,7 +212,7 @@ const GroupDetailsPage: React.FC = () => {
         {expenses.length > 0 ? (
           <Box>
             {expenses.map((expense) => (
-              <ExpenseCard key={expense.expenseId} expense={expense} />
+              <ExpenseCard key={expense.expenseId} expense={expense} setExpenseFormOpen={setExpenseFormOpen} setEditingExpense={setEditingExpense} />
             ))}
           </Box>
         ) : (
@@ -293,10 +294,11 @@ const GroupDetailsPage: React.FC = () => {
       {groupId && (
         <ExpenseForm
           open={expenseFormOpen}
-          onClose={() => setExpenseFormOpen(false)}
+          onClose={() => {setExpenseFormOpen(false); setEditingExpense(null);}}
           groupId={groupId}
           groupName={group.groupName}
           members={members}
+          expenseToEdit={editingExpense}
           onExpenseCreated={handleExpenseCreated}
         />
       )}
