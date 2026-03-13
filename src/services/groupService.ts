@@ -93,26 +93,16 @@ class GroupService {
     return response.data;
   }
 
-  // async createInvite(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
-  //   const response = await axios.post(`/group/${groupId}/invite`, data, {
-  //     params: { requesterEmail },
-  //     headers: {
-  //       Authorization: `Bearer ${jwtToken}`,
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
-  //   return response.data;
-  // }
 
-  // async acceptInvite(token: string, jwtToken: string, requesterEmail: string) {
-  //   const response = await axios.post(`/group/invite/accept`, null, {
-  //     params: { token, requesterEmail },
-  //     headers: {
-  //       Authorization: `Bearer ${jwtToken}`,
-  //     },
-  //   });
-  //   return response.data;
-  // }
+   async removeGroupMember(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.delete(`/group/${groupId}/members/${userId}`, {
+      params: { requesterEmail },
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+    return response.data;
+  }
 
   async createInvite(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
     const response = await axios.post(`/group/${groupId}/invite`, data, {
@@ -157,6 +147,34 @@ class GroupService {
         Authorization: `Bearer ${jwtToken}`,
       },
     });
+    return response.data;
+  }
+
+  async assignAdmin(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(
+      `/group/${groupId}/members/${userId}/assign-admin`,
+      null,
+      {
+        params: { requesterEmail },
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async revokeAdmin(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(
+      `/group/${groupId}/members/${userId}/revoke-admin`,
+      null,
+      {
+        params: { requesterEmail },
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }
+    );
     return response.data;
   }
 
