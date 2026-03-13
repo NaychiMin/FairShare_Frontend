@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -12,21 +12,29 @@ import {
   Tab,
   Skeleton,
   Alert,
-  IconButton
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
   Add as AddIcon,
+  MoreVert as MoreIcon,
   People as PeopleIcon,
-  Receipt as ReceiptIcon
+  Receipt as ReceiptIcon,
+  Payment as PaymentIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 import groupService from '../../services/groupService';
 import expenseService from '../../services/expenseService';
+import settlementService from '../../services/settlementService';
 import ExpenseCard from '../Expense/ExpenseCard';
 import ExpenseForm from '../Expense/ExpenseForm';
+import SettlementForm from '../Expense/SettlementForm'; 
+import SettlementCard from '../Expense/SettlementCard'; 
 import { useAuth } from '../../context/Authentication/useAuth';
-import type { Expense } from "../../types/Expense";
-import type { User } from '../../types/User';
+import BalanceCard from '../Expense/BalanceCard';
 
 interface Group {
   groupId: string;
@@ -40,6 +48,19 @@ interface Member {
   name: string;
   email: string;
   role?: string;
+}
+
+interface Settlement {
+  settlementId: string;
+  fromUserId: string;
+  fromUserName: string;
+  toUserId: string;
+  toUserName: string;
+  amount: number;
+  settlementDate: string;
+  paymentMethod?: string;
+  notes?: string;
+  createdByName: string;
 }
 
 interface TabPanelProps {
@@ -66,37 +87,39 @@ function TabPanel(props: TabPanelProps) {
 const GroupDetailsPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
-  const { jwtToken, user } = useAuth();  // Get user from auth context
+  const { user, jwtToken } = useAuth();
   
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [settlements, setSettlements] = useState<Settlement[]>([]); // Add this
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
+  const [settlementFormOpen, setSettlementFormOpen] = useState(false); 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const fetchGroupDetails = useCallback(async () => {
+  const fetchGroupDetails = async () => {
     try {
-      // Pass user email to the service
       const data = await groupService.getGroupById(groupId!, jwtToken!, user!.email);
       setGroup(data);
     } catch (err) {
       console.error('Failed to fetch group:', err);
       setError('Failed to load group details');
     }
-  }, [groupId, jwtToken, user]);
+  };
 
-  const fetchGroupMembers = useCallback(async () => {
+  const fetchGroupMembers = async () => {
     try {
       const data = await groupService.getGroupMembers(groupId!, jwtToken!, user!.email);
       setMembers(data);
     } catch (err) {
       console.error('Failed to fetch members:', err);
     }
-  }, [groupId, jwtToken, user]);
+  };
 
-  const fetchGroupExpenses = useCallback(async () => {
+  const fetchGroupExpenses = async () => {
     try {
       const data = await expenseService.getGroupExpenses(groupId!, jwtToken!, user!.email);
       setExpenses(data);
@@ -105,23 +128,47 @@ const GroupDetailsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [groupId, jwtToken, user]);
+  };
 
-    useEffect(() => {
-    if (groupId && jwtToken && user?.email) { 
+  const fetchSettlements = async () => {
+    try {
+      const data = await settlementService.getGroupSettlements(groupId!, jwtToken!, user!.email);
+      setSettlements(data);
+    } catch (err) {
+      console.error('Failed to fetch settlements:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (groupId && user?.email) {
       fetchGroupDetails();
       fetchGroupExpenses();
       fetchGroupMembers();
+      fetchSettlements(); 
     }
-  }, [groupId, jwtToken, user, fetchGroupDetails, fetchGroupExpenses, fetchGroupMembers]);
+  }, [groupId, user]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   const handleExpenseCreated = () => {
     fetchGroupExpenses();
     setExpenseFormOpen(false);
+  };
+
+  // Add this new function
+  const handleSettlementCreated = () => {
+    fetchSettlements();
+    setSettlementFormOpen(false);
   };
 
   if (loading) {
@@ -175,14 +222,49 @@ const GroupDetailsPage: React.FC = () => {
         </Box>
         
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setExpenseFormOpen(true)}
+          {/* Conditional button based on active tab */}
+          {tabValue === 0 ? (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setExpenseFormOpen(true)}
+            >
+              Add Expense
+            </Button>
+          ) : tabValue === 2 ? (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setSettlementFormOpen(true)}
+            >
+              Record Settlement
+            </Button>
+          ) : null}
+          
+          <IconButton onClick={handleMenuOpen}>
+            <MoreIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
           >
-            Add Expense
-          </Button>
+            <MenuItem onClick={() => { handleMenuClose(); navigate(`/groups/edit/${groupId}`); }}>
+              <SettingsIcon sx={{ mr: 1 }} /> Edit Group
+            </MenuItem>
+            <MenuItem onClick={handleMenuClose}>
+              <PeopleIcon sx={{ mr: 1 }} /> Manage Members
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+              Archive Group
+            </MenuItem>
+          </Menu>
         </Box>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <BalanceCard groupId={groupId!} />
       </Box>
 
       {/* Tabs */}
@@ -190,7 +272,7 @@ const GroupDetailsPage: React.FC = () => {
         <Tabs value={tabValue} onChange={handleTabChange}>
           <Tab label="Expenses" icon={<ReceiptIcon />} iconPosition="start" />
           <Tab label="Members" icon={<PeopleIcon />} iconPosition="start" />
-          <Tab label="Settlements" icon={<ReceiptIcon />} iconPosition="start" />
+          <Tab label="Settlements" icon={<PaymentIcon />} iconPosition="start" />
         </Tabs>
       </Box>
 
@@ -270,11 +352,37 @@ const GroupDetailsPage: React.FC = () => {
 
       {/* Settlements Tab */}
       <TabPanel value={tabValue} index={2}>
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="body1" color="text.secondary">
-            Settlement feature will be implemented in later sprints
-          </Typography>
-        </Paper>
+        {settlements.length > 0 ? (
+          <Box>
+            {settlements.map((settlement) => (
+              <SettlementCard key={settlement.settlementId} settlement={settlement} />
+            ))}
+          </Box>
+        ) : (
+          <Paper 
+            sx={{ 
+              p: 6, 
+              textAlign: 'center',
+              bgcolor: 'grey.50',
+              borderRadius: 2
+            }}
+          >
+            <PaymentIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No settlements yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Record payments between members to settle debts
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setSettlementFormOpen(true)}
+            >
+              Record Your First Settlement
+            </Button>
+          </Paper>
+        )}
       </TabPanel>
 
       {/* Expense Form Modal */}
@@ -286,6 +394,18 @@ const GroupDetailsPage: React.FC = () => {
           groupName={group.groupName}
           members={members}
           onExpenseCreated={handleExpenseCreated}
+        />
+      )}
+
+      {/* Settlement Form Modal */}
+      {groupId && (
+        <SettlementForm
+          open={settlementFormOpen}
+          onClose={() => setSettlementFormOpen(false)}
+          groupId={groupId}
+          groupName={group.groupName}
+          members={members}
+          onSettlementCreated={handleSettlementCreated}
         />
       )}
     </Container>
