@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import authService from "../../services/authService";
 import { AuthContext } from "./AuthContext";
 import type { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
+import axios from "../../api/axios";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -13,7 +14,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(
     authService.isAuthenticated(),
   );
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/auth/current", { withCredentials: true });
+        setUser(res.data);
+      } catch (err: unknown) {
+        console.error('Error', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+  
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
 
@@ -48,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         logout,
         updateUser,
+        loading,
       }}
     >
       {children}

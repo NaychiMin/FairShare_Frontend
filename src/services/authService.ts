@@ -21,20 +21,18 @@ class AuthService {
     return response.data;
   }
 
-  async update(data: ProfileFormInputs, userId: string, jwtToken: string) {
+  async update(data: ProfileFormInputs, userId: string) {
     const response = await axios.put(`/user/${userId}`, data, {
       headers: {
-        Authorization: `Bearer ${jwtToken}`,
         "Content-Type": "application/json",
       },
     });
     return response.data;
   }
 
-  async updatePassword(data: ChangePasswordInputs, userId: string, jwtToken: string) {
+  async updatePassword(data: ChangePasswordInputs, userId: string) {
     const response = await axios.put(`/user/${userId}/update-password`, data, {
       headers: {
-        Authorization: `Bearer ${jwtToken}`,
         "Content-Type": "application/json",
       },
     });
