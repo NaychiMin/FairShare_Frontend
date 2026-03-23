@@ -25,7 +25,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import expenseService from '../../services/expenseService';
 import { useAuth } from '../../context/Authentication/useAuth';
-import type { CreateExpenseRequest } from '../../types/Expense';
+import type { CreateExpenseRequest, EditExpenseRequest } from '../../types/Expense';
 
 interface Member {
   userId: string;
@@ -40,6 +40,7 @@ interface ExpenseFormProps {
   groupName: string;
   members: Member[];
   onExpenseCreated: () => void;
+  expenseToEdit?: any; // Optional prop for editing existing expense
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
@@ -48,7 +49,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   groupId,
   groupName,
   members,
-  onExpenseCreated
+  onExpenseCreated,
+  expenseToEdit,
 }) => {
   const { user, jwtToken } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [participants, setParticipants] = useState<string[]>([]);
   const [expenseDate, setExpenseDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState('');
+  const isEditMode = !!expenseToEdit;
 
   // Set defaults when form opens
   useEffect(() => {
@@ -74,6 +77,15 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       
       // Set default participants to all members
       setParticipants(members.map(m => m.userId));
+    }
+    if (isEditMode && expenseToEdit) {
+      console.log(expenseToEdit)
+      setDescription(expenseToEdit.description);
+      setAmount(expenseToEdit.amount);
+      setPaidBy(expenseToEdit.paidByUserId);
+      setParticipants(expenseToEdit.splits.map((s: any) => s.userId));
+      setExpenseDate(new Date(expenseToEdit.expenseDate));
+      setNotes(expenseToEdit.notes || '');
     }
   }, [open, members, user]);
 
@@ -118,7 +130,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
     setLoading(true);
     try {
-      const expenseData: CreateExpenseRequest = {
+      if (isEditMode){
+        const expenseData: EditExpenseRequest = {
+          ... expenseToEdit,
         groupId,
         paidByUserId: paidBy,
         amount,
@@ -129,7 +143,21 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         participantUserIds: participants
       };
 
+      await expenseService.updateExpense(expenseData, jwtToken!, user!.email);
+      } else {
+        const expenseData: CreateExpenseRequest = {
+          groupId,
+          paidByUserId: paidBy,
+          amount,
+          description,
+          notes: notes || undefined,
+          expenseDate: expenseDate.toISOString(),
+          splitStrategy: 'EQUAL',
+          participantUserIds: participants
+        };
+
       await expenseService.createExpense(expenseData, jwtToken!, user!.email);
+      }
       onExpenseCreated();
       onClose();
     } catch (error) {
@@ -148,7 +176,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ borderBottom: '1px solid', borderColor: 'grey.200', pb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>Add Expense</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>{isEditMode ? 'Edit' : 'Add'} Expense</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
             in {groupName}
           </Typography>
@@ -278,11 +306,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           disabled={loading}
           sx={{ ml: 2 }}
         >
-          {loading ? 'Creating...' : 'Add Expense'}
+          {loading ? 'Creating...' : `${isEditMode ? 'Edit' : 'Add'} Expense`}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default ExpenseForm; {}
+export default ExpenseForm;

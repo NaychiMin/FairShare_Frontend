@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -35,13 +35,8 @@ const ExpenseDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (expenseId && jwtToken && user) {
-      fetchExpenseDetails();
-    }
-  }, [expenseId, jwtToken]);
 
-  const fetchExpenseDetails = async () => {
+  const fetchExpenseDetails = useCallback(async () => {
     try {
       setLoading(true);
       const data = await expenseService.getExpenseById(expenseId!, jwtToken!, user!.email);
@@ -52,7 +47,13 @@ const ExpenseDetails: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [expenseId, jwtToken, user]);
+
+  useEffect(() => {
+    if (expenseId && jwtToken && user) {
+      fetchExpenseDetails();
+    }
+  }, [expenseId, jwtToken, user, fetchExpenseDetails]);
 
   if (loading) {
     return (
@@ -211,4 +212,4 @@ const ExpenseDetails: React.FC = () => {
   );
 };
 
-export default ExpenseDetails;  {}
+export default ExpenseDetails;
