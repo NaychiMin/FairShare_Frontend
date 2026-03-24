@@ -338,7 +338,7 @@ import ExpenseCard from '../Expense/ExpenseCard';
 import ExpenseForm from '../Expense/ExpenseForm';
 import { useAuth } from '../../context/Authentication/useAuth';
 
-interface Group {
+export interface Group {
   groupId: string;
   groupName: string;
   category: string;
