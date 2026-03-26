@@ -14,6 +14,7 @@ import ArchivedGroupsPage from './pages/Groups/ArchivedGroupsPage';
 import CreateGroupForm from './pages/Groups/NewGroup';
 import GroupDetailsPage from "./pages/Groups/GroupDetailsPage";
 import ExpenseDetails from "./pages/Expense/ExpenseDetails";
+import SettlementDetails from "./pages/Expense/SettlementDetailsPage";
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="archived-groups" element={<ArchivedGroupsPage />} />
             <Route path="groups/:groupId" element={<GroupDetailsPage />} />
             <Route path="expenses/:expenseId" element={<ExpenseDetails />} />
+            <Route path="settlements/:settlementId" element={<SettlementDetails />} />
           </Route>
         </Route>
       </Routes>
