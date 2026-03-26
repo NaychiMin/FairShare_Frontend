@@ -17,6 +17,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface SettlementCardProps {
   settlement: {
@@ -33,14 +34,25 @@ interface SettlementCardProps {
   };
   onEdit?: (settlementId: string) => void;
   onDelete?: (settlementId: string) => void;
+  onClick?: (settlementId: string) => void; 
 }
 
 const SettlementCard: React.FC<SettlementCardProps> = ({ 
   settlement, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onClick 
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick(settlement.settlementId);
+    } else {
+      navigate(`/settlements/${settlement.settlementId}`);
+    }
+  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -60,10 +72,13 @@ const SettlementCard: React.FC<SettlementCardProps> = ({
         borderRadius: '12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         transition: 'all 0.2s ease',
+        cursor: 'pointer',
         '&:hover': {
           boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
+          transform: 'translateY(-2px)',
         },
       }}
+      onClick={handleCardClick}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
@@ -72,17 +87,17 @@ const SettlementCard: React.FC<SettlementCardProps> = ({
           </Avatar>
 
           <Box sx={{ flex: 1 }}>
-            {/* Payment flow: From → To */}
+            {/* Payment flow: From & To */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Chip
-                avatar={<Avatar>{settlement.fromUserName.charAt(0)}</Avatar>}
+                avatar={<Avatar sx={{ width: 24, height: 24 }}>{settlement.fromUserName.charAt(0)}</Avatar>}
                 label={settlement.fromUserName}
                 size="small"
                 variant="outlined"
               />
               <ArrowIcon fontSize="small" color="action" />
               <Chip
-                avatar={<Avatar>{settlement.toUserName.charAt(0)}</Avatar>}
+                avatar={<Avatar sx={{ width: 24, height: 24 }}>{settlement.toUserName.charAt(0)}</Avatar>}
                 label={settlement.toUserName}
                 size="small"
                 variant="outlined"
@@ -124,7 +139,7 @@ const SettlementCard: React.FC<SettlementCardProps> = ({
           </Box>
         </Box>
 
-        {/* Actions menu (for future edit/delete) */}
+        {/* Actions menu (for edit/delete) */}
         {(onEdit || onDelete) && (
           <>
             <IconButton size="small" onClick={handleMenuOpen}>
