@@ -65,6 +65,16 @@ class SettlementService {
     });
     return response.data;
   }
+
+  // Delete settlement by Id
+  async deleteSettlement(settlementId: string, jwtToken: string, userEmail: string): Promise<void> {
+    await axios.delete(`/settlements/${settlementId}`, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+    });
+  }
 }
 
 export default new SettlementService();
