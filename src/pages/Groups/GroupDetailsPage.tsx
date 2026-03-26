@@ -15,7 +15,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Divider
+  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -92,7 +96,7 @@ const GroupDetailsPage: React.FC = () => {
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
-  const [settlements, setSettlements] = useState<Settlement[]>([]); // Add this
+  const [settlements, setSettlements] = useState<Settlement[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tabValue, setTabValue] = useState(0);
@@ -100,6 +104,8 @@ const GroupDetailsPage: React.FC = () => {
   const [settlementFormOpen, setSettlementFormOpen] = useState(false); 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedSettlementId, setSelectedSettlementId] = useState<string | null>(null);
 
   const fetchGroupDetails = async () => {
     try {
@@ -137,6 +143,17 @@ const GroupDetailsPage: React.FC = () => {
       setSettlements(data);
     } catch (err) {
       console.error('Failed to fetch settlements:', err);
+    }
+  };
+
+  const handleDeleteSettlement = async (settlementId: string) => {
+    try {
+      await settlementService.deleteSettlement(settlementId, jwtToken!, user!.email);
+      fetchSettlements(); 
+      setDeleteDialogOpen(false);
+    } catch (err) {
+      console.error('Failed to delete settlement:', err);
+      alert('Failed to delete settlement');
     }
   };
 
@@ -356,7 +373,14 @@ const GroupDetailsPage: React.FC = () => {
         {settlements.length > 0 ? (
           <Box>
             {settlements.map((settlement) => (
-              <SettlementCard key={settlement.settlementId} settlement={settlement} />
+              <SettlementCard 
+                key={settlement.settlementId} 
+                settlement={settlement}
+                onDelete={(settlementId: string) => {
+                  setSelectedSettlementId(settlementId);
+                  setDeleteDialogOpen(true);
+                }}
+              />
             ))}
           </Box>
         ) : (
@@ -410,6 +434,27 @@ const GroupDetailsPage: React.FC = () => {
           onSettlementCreated={handleSettlementCreated}
         />
       )}
+
+      {/* Settlement Delete Dialogue */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Delete Settlement</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this settlement? This action cannot be undone.
+            The balance will be restored to its previous state.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={() => handleDeleteSettlement(selectedSettlementId!)} 
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -46,7 +46,10 @@ const SettlementCard: React.FC<SettlementCardProps> = ({
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.target instanceof Element && e.target.closest('.MuiMenu-paper')) {
+      return;
+    }
     if (onClick) {
       onClick(settlement.settlementId);
     } else {
