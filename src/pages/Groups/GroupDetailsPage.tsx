@@ -24,6 +24,7 @@ import {
 import {
   ArrowBack as BackIcon,
   Add as AddIcon,
+  ExitToApp as TimeToLeaveIcon,
   MoreVert as MoreIcon,
   People as PeopleIcon,
   Receipt as ReceiptIcon,
@@ -39,6 +40,7 @@ import SettlementForm from '../Expense/SettlementForm';
 import SettlementCard from '../Expense/SettlementCard'; 
 import { useAuth } from '../../context/Authentication/useAuth';
 import BalanceCard from '../Expense/BalanceCard';
+import { toast } from 'react-toastify';
 
 interface Group {
   groupId: string;
@@ -137,6 +139,18 @@ const GroupDetailsPage: React.FC = () => {
     }
   };
 
+  const leaveGroup = async () => {
+    try {
+      await groupService.leaveGroup(groupId!, jwtToken!, user!.email);
+      toast.success("Left group successfully");
+      navigate('/groups')
+    } catch (err) {
+      console.error('Failed to fetch expenses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchSettlements = async () => {
     try {
       const data = await settlementService.getGroupSettlements(groupId!, jwtToken!, user!.email);
@@ -188,6 +202,11 @@ const GroupDetailsPage: React.FC = () => {
     fetchSettlements();
     setSettlementFormOpen(false);
   };
+
+  const totalShareAmount = expenses.reduce((sum, expense) => {
+  const userSplit = expense.splits.find((s: any) => s.userId === user?.userId);
+    return sum + (userSplit?.shareamount || 0);
+  }, 0);
 
   if (loading) {
     return (
@@ -297,11 +316,21 @@ const GroupDetailsPage: React.FC = () => {
       {/* Expenses Tab */}
       <TabPanel value={tabValue} index={0}>
         {expenses.length > 0 ? (
-          <Box>
-            {expenses.map((expense) => (
-              <ExpenseCard key={expense.expenseId} expense={expense} setExpenseFormOpen={setExpenseFormOpen} setEditingExpense={setEditingExpense} />
-            ))}
-          </Box>
+          <>
+            <Box>
+              {expenses.map((expense) => (
+                <ExpenseCard key={expense.expenseId} expense={expense} setExpenseFormOpen={setExpenseFormOpen} setEditingExpense={setEditingExpense} />
+              ))}
+            </Box>
+            {totalShareAmount == 0 && <Button
+              variant="contained"
+              color='error'
+              startIcon={<TimeToLeaveIcon />}
+              onClick={() => leaveGroup()}
+            >
+              Leave Group
+            </Button>}
+          </>
         ) : (
           <Paper 
             sx={{ 
