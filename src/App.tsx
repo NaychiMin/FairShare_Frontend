@@ -17,6 +17,7 @@ import ExpenseDetails from "./pages/Expense/ExpenseDetails";
 import AcceptInvitePage from './pages/Groups/AcceptInvitePage';
 import PendingInvitesPage from './pages/Groups/PendingInvitesPage';
 import SentInvitesPage from './pages/Groups/SentInvitesPage';
+import SettlementDetails from "./pages/Expense/SettlementDetailsPage";
 
 function App() {
 
@@ -40,8 +41,11 @@ function App() {
             <Route path="archived-groups" element={<ArchivedGroupsPage />} />
             <Route path="groups/:groupId" element={<GroupDetailsPage />} />
             <Route path="expenses/:expenseId" element={<ExpenseDetails />} />
+
             <Route path="sent-invites" element={<SentInvitesPage />} />
             <Route path="pending-invites" element={<PendingInvitesPage />} />
+
+            <Route path="settlements/:settlementId" element={<SettlementDetails />} />
           </Route>
         </Route>
       </Routes>

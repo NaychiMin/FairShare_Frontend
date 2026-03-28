@@ -1,5 +1,5 @@
 import React, { useState, type PropsWithChildren } from "react";
-import { Box, CssBaseline, useMediaQuery } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Outlet } from "react-router-dom";
 
@@ -7,9 +7,6 @@ import TopBar from "./TopBar";
 import SideBar from "./SideBar";
 
 type MainLayoutProps = PropsWithChildren;
-
-const DRAWER_WIDTH = 240;
-const COLLAPSED_WIDTH = 72;
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const theme = useTheme();

@@ -38,6 +38,14 @@ class GroupService {
     return response.data;
   }
 
+  async leaveGroup(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.put(`/group/leave/${groupId}`, null, {
+      params: { requesterEmail },
+      headers: { Authorization: `Bearer ${jwtToken}` },
+    });
+    return response.data;
+  }
+
   async unarchiveGroup(groupId: string, jwtToken: string, requesterEmail: string) {
     const response = await axios.put(`/group/unarchive/${groupId}`, null, {
       params: { requesterEmail },

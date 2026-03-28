@@ -45,3 +45,15 @@ export interface CreateExpenseRequest {
   splitStrategy: 'EQUAL'; // For Sprint2
   participantUserIds: string[];
 }
+
+export interface EditExpenseRequest {
+  expenseId: string;
+  groupId: string;
+  paidByUserId: string;
+  amount: number;
+  description: string;
+  notes?: string;
+  expenseDate: string;
+  splitStrategy: 'EQUAL'; // For Sprint2
+  participantUserIds: string[];
+}
