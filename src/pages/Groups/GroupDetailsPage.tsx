@@ -74,6 +74,14 @@ interface Settlement {
   createdByName: string;
 }
 
+interface GroupMemberActionStatus {
+  userId: string;
+  netBalance: number;
+  canLeave: boolean;
+  canRemove: boolean;
+  warningMessage?: string | null;
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -109,10 +117,11 @@ const GroupDetailsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [expenseFormOpen, setExpenseFormOpen] = useState(false);
   const [settlementFormOpen, setSettlementFormOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [editingExpense, setEditingExpense] = useState<any>(null);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedSettlementId, setSelectedSettlementId] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [editingExpense, setEditingExpense] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedSettlementId, setSelectedSettlementId] = useState<string | null>(null);
+  const [memberActionStatuses, setMemberActionStatuses] = useState<GroupMemberActionStatus[]>([]);
 
   useEffect(() => {
     if (groupId && jwtToken && user?.email) {
@@ -154,6 +163,16 @@ const GroupDetailsPage: React.FC = () => {
     }
   };
 
+  const fetchGroupMemberActionStatuses = async () => {
+  try {
+    const data = await groupService.getGroupMemberActionStatus(groupId!, jwtToken!, user!.email);
+    setMemberActionStatuses(data);
+  } catch (err) {
+    console.error('Failed to fetch member action statuses:', err);
+    toast.error((err as any).response?.data?.message || 'Failed to load member action statuses');
+  }
+};
+
   const fetchGroupExpenses = async () => {
     try {
       const data = await expenseService.getGroupExpenses(groupId!, jwtToken!, user!.email);
@@ -166,15 +185,44 @@ const GroupDetailsPage: React.FC = () => {
 
   //const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
 
+  // const leaveGroup = async () => {
+  //   try {
+  //     await groupService.leaveGroup(groupId!, jwtToken!, user!.email);
+  //     toast.success("Left group successfully");
+  //     navigate('/groups')
+  //   } catch (err) {
+  //     console.error('Failed to fetch expenses:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const leaveGroup = async () => {
+    if (!groupId || !jwtToken || !user?.email) return;
+
     try {
-      await groupService.leaveGroup(groupId!, jwtToken!, user!.email);
+      await groupService.leaveGroup(groupId, jwtToken, user.email);
       toast.success("Left group successfully");
-      navigate('/groups')
+      navigate('/groups');
     } catch (err) {
-      console.error('Failed to fetch expenses:', err);
+      console.error('Failed to leave group:', err);
+      toast.error((err as any).response?.data || 'Failed to leave group');
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const handleRemoveMember = async (member: Member & { effectiveRole?: string }) => {
+    if (!groupId || !jwtToken || !user?.email) return;
+
+    try {
+      await groupService.removeGroupMember(groupId, member.userId, jwtToken, user.email);
+      toast.success(`${member.name} removed successfully`);
+      fetchGroupMembers();
+      fetchGroupMemberActionStatuses();
+    } catch (err) {
+      toast.error((err as any).response?.data || 'Failed to remove member');
     }
   };
 
@@ -203,7 +251,8 @@ const GroupDetailsPage: React.FC = () => {
       fetchGroupDetails();
       fetchGroupExpenses();
       fetchGroupMembers();
-      fetchSettlements(); 
+      fetchGroupMemberActionStatuses();
+      fetchSettlements();
     }
   }, [groupId, user]);
 
@@ -237,6 +286,14 @@ const GroupDetailsPage: React.FC = () => {
   }, [normalizedMembers, user?.email]);
 
   const isCurrentUserAdmin = currentUserMembership?.effectiveRole === 'GROUP_ADMIN';
+
+  const currentUserActionStatus = useMemo(() => {
+    return memberActionStatuses.find((status) => status.userId === user?.userId);
+  }, [memberActionStatuses, user?.userId]);
+
+  const getMemberActionStatus = (memberUserId: string) => {
+    return memberActionStatuses.find((status) => status.userId === memberUserId);
+  };
 
   const handleAssignAdmin = async (member: Member & { effectiveRole?: string }) => {
     if (!groupId || !jwtToken || !user?.email) return;
@@ -390,14 +447,38 @@ const GroupDetailsPage: React.FC = () => {
                 <ExpenseCard key={expense.expenseId} expense={expense} setExpenseFormOpen={setExpenseFormOpen} setEditingExpense={setEditingExpense} />
               ))}
             </Box>
-            {totalShareAmount == 0 && <Button
-              variant="contained"
-              color='error'
-              startIcon={<TimeToLeaveIcon />}
-              onClick={() => leaveGroup()}
-            >
-              Leave Group
-            </Button>}
+          
+            {currentUserActionStatus?.canLeave && (
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<TimeToLeaveIcon />}
+                onClick={() => leaveGroup()}
+              >
+                Leave Group
+              </Button>
+            )}
+
+            {currentUserActionStatus && !currentUserActionStatus.canLeave && (
+              <Tooltip title={currentUserActionStatus.warningMessage || 'You cannot leave this group yet'}>
+                <span>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<TimeToLeaveIcon />}
+                    disabled
+                  >
+                    Leave Group
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
+
+            {currentUserActionStatus?.warningMessage && !currentUserActionStatus.canLeave && (
+              <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                {currentUserActionStatus.warningMessage}
+              </Typography>
+            )}
           </>
         ) : (
           <Paper
@@ -447,6 +528,7 @@ const GroupDetailsPage: React.FC = () => {
             {normalizedMembers.map((member) => {
               const isMemberAdmin = member.effectiveRole === 'GROUP_ADMIN';
               const isSelf = member.email === user?.email;
+              const memberActionStatus = getMemberActionStatus(member.userId);
 
               return (
                 <Box
@@ -463,18 +545,20 @@ const GroupDetailsPage: React.FC = () => {
                     '&:hover': { bgcolor: 'grey.50' }
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar>{member.name?.charAt(0) || '?'}</Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      {member.name || 'Unknown'}
+                    </Typography>
 
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={700}>
-                        {member.name || 'Unknown'}
-                      </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {member.email}
+                    </Typography>
 
-                      <Typography variant="body2" color="text.secondary">
-                        {member.email}
+                    {memberActionStatus?.warningMessage && !memberActionStatus.canRemove && isCurrentUserAdmin && !isSelf && (
+                      <Typography variant="caption" color="error" display="block" sx={{ mt: 0.5 }}>
+                        {memberActionStatus.warningMessage}
                       </Typography>
-                    </Box>
+                    )}
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -526,6 +610,36 @@ const GroupDetailsPage: React.FC = () => {
                             </IconButton>
                           </Tooltip>
                         )}
+
+
+                        {isCurrentUserAdmin && !isSelf && (
+                          <>
+                            <Tooltip title={memberActionStatus?.canRemove ? "Remove member" : (memberActionStatus?.warningMessage || "Cannot remove member")}>
+                              <span>
+                                <IconButton
+                                  onClick={() => handleRemoveMember(member)}
+                                  disabled={!memberActionStatus?.canRemove}
+                                  sx={{
+                                    border: '1px solid',
+                                    borderColor: 'error.main',
+                                    borderRadius: '10px',
+                                    color: 'error.main',
+                                    '&:hover': {
+                                      backgroundColor: 'error.main',
+                                      color: 'white'
+                                    }
+                                  }}
+                                >
+                                  <TimeToLeaveIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </>
+                        )}
+
+
+
+
                       </>
                     )}
                   </Box>

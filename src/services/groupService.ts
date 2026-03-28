@@ -186,6 +186,17 @@ class GroupService {
     return response.data;
   }
 
+
+  async getGroupMemberActionStatus(groupId: string, jwtToken: string, requesterEmail: string) {
+  const response = await axios.get(`/group/${groupId}/members/action-status`, {
+    params: { requesterEmail },
+    headers: {
+      Authorization: `Bearer ${jwtToken}`,
+    },
+  });
+  return response.data;
+}
+
 }
 
 export default new GroupService();
