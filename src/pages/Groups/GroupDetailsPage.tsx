@@ -13,7 +13,7 @@ import {
   Skeleton,
   Alert,
   IconButton,
-  Tooltip
+  Tooltip,
   Menu,
   MenuItem,
   Divider,
@@ -28,11 +28,9 @@ import {
   People as PeopleIcon,
   Receipt as ReceiptIcon,
   AdminPanelSettings as AdminPanelSettingsIcon,
-  ShieldOutlined as ShieldOutlinedIcon
+  ShieldOutlined as ShieldOutlinedIcon,
   ExitToApp as TimeToLeaveIcon,
   MoreVert as MoreIcon,
-  People as PeopleIcon,
-  Receipt as ReceiptIcon,
   Payment as PaymentIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
@@ -46,7 +44,6 @@ import SettlementForm from '../Expense/SettlementForm';
 import SettlementCard from '../Expense/SettlementCard'; 
 import { useAuth } from '../../context/Authentication/useAuth';
 import BalanceCard from '../Expense/BalanceCard';
-import { toast } from 'react-toastify';
 
 interface Group {
   groupId: string;
