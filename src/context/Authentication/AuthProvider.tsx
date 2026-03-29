@@ -1,17 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import authService from "../../services/authService";
 import { AuthContext } from "./AuthContext";
 import type { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
+import axios from "../../api/axios";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { navigate } = useNavigate();
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const navigate = useNavigate();
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(
-    authService.isAuthenticated()
+    authService.isAuthenticated(),
   );
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/auth/current", { withCredentials: true });
+        setUser(res.data);
+      } catch (err: unknown) {
+        console.error('Error', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+  
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
 
@@ -34,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("token");
     setIsAuthenticated(false);
 
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -46,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         updateUser,
+        loading,
       }}
     >
       {children}

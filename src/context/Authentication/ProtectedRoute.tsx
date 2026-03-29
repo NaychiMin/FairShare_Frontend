@@ -3,14 +3,18 @@ import { useAuth } from "./useAuth";
 import { toast } from "react-toastify";
 
 const ProtectedRoute = () => {
-  const { jwtToken, user } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (!jwtToken || !user) {
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!loading && !user) {
     toast.warning("User has been logged out.");
     return <Navigate to="/login" replace />;
   }
 
-  return jwtToken && user ? <Outlet /> : <Navigate to="/login" replace />;
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

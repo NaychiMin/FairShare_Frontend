@@ -1,7 +1,7 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import './App.css'
+import "./App.css";
 
 import LoginForm from './pages/Authentication/LoginPage/LoginPage';
 import RegisterForm from './pages/Authentication/RegisterPage/RegisterPage';
@@ -20,12 +20,10 @@ import SentInvitesPage from './pages/Groups/SentInvitesPage';
 import SettlementDetails from "./pages/Expense/SettlementDetailsPage";
 
 function App() {
-
   return (
     <>
       <ToastContainer />
       <Routes>
-    
         <Route index element={<Navigate to="login" replace />} />
 
         <Route path="login" element={<LoginForm />} />
@@ -50,7 +48,7 @@ function App() {
         </Route>
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

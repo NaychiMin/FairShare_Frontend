@@ -16,12 +16,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100%", }}>
+    <Box sx={{ display: "flex", minHeight: "100%" }}>
       {/* TopBar */}
       <TopBar
         isMobile={isMobile}
-        onMenuClick={() => setMobileOpen(prev => !prev)}
-        onCollapseToggle={() => setCollapsed(prev => !prev)}
+        onMenuClick={() => setMobileOpen((prev) => !prev)}
+        onCollapseToggle={() => setCollapsed((prev) => !prev)}
       />
 
       {/* SideBar */}
@@ -39,14 +39,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           flexGrow: 1, // take remaining space
           width: "100%",
           height: "100vh",
-          display: "flex",    // force normal flow, not flex
+          display: "flex", // force normal flow, not flex
           textAlign: "left",
-          paddingTop: "60px"
+          paddingTop: "60px",
           // marginLeft: `${isMobile ? 0 : collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH}px`,
         }}
       >
         {children ?? <Outlet />}
-    </Box>
+      </Box>
     </Box>
   );
 };

@@ -8,8 +8,8 @@ const stringAvatar = (name: string) => {
     words.length === 0 || words[0] === ""
       ? "?"
       : words.length === 1
-      ? words[0][0]
-      : `${words[0][0]}${words[words.length - 1][0]}`;
+        ? words[0][0]
+        : `${words[0][0]}${words[words.length - 1][0]}`;
 
   return {
     sx: {
@@ -21,10 +21,10 @@ const stringAvatar = (name: string) => {
 
 type UserAvatarTypes = {
   name?: string;
-}
+};
 
-const UserAvatar = ({ name = "" }: UserAvatarTypes ) => {
-  return <Avatar {...stringAvatar(name)} /> ;
-}
+const UserAvatar = ({ name = "" }: UserAvatarTypes) => {
+  return <Avatar {...stringAvatar(name)} />;
+};
 
 export default UserAvatar;
