@@ -69,7 +69,7 @@ const ProfilePage: React.FC = () => {
     setValue(newValue);
   };
 
-  const handleToastClose = (_: React.SyntheticEvent | Event) => {
+  const handleToastClose = () => {
     setSuccess(false);
   };
 

@@ -1,7 +1,7 @@
 import { Client, type IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
-type MessageHandler = (message: any) => void;
+type MessageHandler = (message: unknown) => void;
 
 class WebSocketService {
   private stompClient: Client | null = null;
@@ -73,7 +73,7 @@ class WebSocketService {
     };
   }
 
-  private notifyHandlers(topic: string, data: any): void {
+  private notifyHandlers(topic: string, data: unknown): void {
     const handlers = this.handlers.get(topic);
     if (handlers) {
       handlers.forEach((handler) => handler(data));
