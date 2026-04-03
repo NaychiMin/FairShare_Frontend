@@ -54,6 +54,27 @@ class SettlementService {
     });
     return response.data;
   }
+
+  // Get single settlement record by Id
+  async getSettlementById(settlementId: string, jwtToken: string, userEmail: string): Promise<SettlementResponse> {
+    const response = await axios.get(`/settlements/${settlementId}`, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+    });
+    return response.data;
+  }
+
+  // Delete settlement by Id
+  async deleteSettlement(settlementId: string, jwtToken: string, userEmail: string): Promise<void> {
+    await axios.delete(`/settlements/${settlementId}`, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+    });
+  }
 }
 
 export default new SettlementService();
