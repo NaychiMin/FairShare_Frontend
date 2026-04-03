@@ -9,15 +9,18 @@ import { theme } from "./theme";
 import { BrowserRouter } from "react-router-dom";
 
 import { AuthProvider } from "./context/Authentication/AuthProvider.tsx";
+import { AuthBadgeProvider } from "./context/Badge/AuthBadgeProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
-        </ThemeProvider>
+        <AuthBadgeProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <App />
+          </ThemeProvider>
+        </AuthBadgeProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
