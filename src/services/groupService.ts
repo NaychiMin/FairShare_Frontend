@@ -123,12 +123,9 @@ class GroupService {
     return response.data;
   }
 
-  async acceptInvite(token: string, jwtToken: string, requesterEmail: string) {
+  async acceptInvite(token: string, requesterEmail: string) {
     const response = await axios.post(`/group/invite/accept`, null, {
       params: { token, requesterEmail },
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
     });
     return response.data;
   }

@@ -32,13 +32,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
   
   const login = async (email: string, password: string) => {
-    const response = await authService.login({ email, password });
-
-    setIsAuthenticated(true);
-    setJwtToken(response.jwt);
-    setUser(response.user);
-
-    localStorage.setItem("token", response.jwt);
+    setLoading(true);
+    try {
+      const response = await authService.login({ email, password });
+      setIsAuthenticated(true);
+      setJwtToken(response.jwt);
+      setUser(response.user);
+      localStorage.setItem("token", response.jwt);
+    } finally {
+      setLoading(false); // <--- important
+    }
   };
 
   const updateUser = async (user: User) => {

@@ -44,13 +44,13 @@ const AcceptInvitePage = () => {
   }, [loading, user, location, navigate]);
 
   const handleAccept = async () => {
-    if (!token || !user?.email || !jwtToken) {
+    if (!token || !user?.email) {
       toast.error("Please log in first");
       return;
     }
 
     try {
-      await groupService.acceptInvite(token, jwtToken, user.email);
+      await groupService.acceptInvite(token, user.email);
       toast.success("Invitation accepted");
       sessionStorage.removeItem("pendingInviteRedirect");
       navigate("/groups");
