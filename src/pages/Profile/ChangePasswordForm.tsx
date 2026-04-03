@@ -27,7 +27,7 @@ const passwordSchema = yup.object({
 });
 
 const ChangePasswordForm: React.FC = () => {
-  const { user, jwtToken } = useAuth();
+  const { user } = useAuth();
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +56,7 @@ const ChangePasswordForm: React.FC = () => {
     try {
       await authService.updatePassword(
         data,
-        user?.userId || "nil",
-        jwtToken || "",
+        user?.userId || "nil"
       );
       toast.success("Successfully updated password.");
       reset();

@@ -33,7 +33,7 @@ const schema = yup.object({
 });
 
 const ProfilePage: React.FC = () => {
-  const { user, jwtToken, updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,8 +76,7 @@ const ProfilePage: React.FC = () => {
     try {
       const response = await authService.update(
         data,
-        user?.userId || "nil",
-        jwtToken || "",
+        user?.userId || "nil"
       );
       if (response.user) {
         updateUser(response.user);
