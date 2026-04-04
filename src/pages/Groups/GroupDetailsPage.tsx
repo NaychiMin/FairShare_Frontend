@@ -45,7 +45,7 @@ import SettlementCard from '../Expense/SettlementCard';
 import { useAuth } from '../../context/Authentication/useAuth';
 import BalanceCard from '../Expense/BalanceCard';
 
-interface Group {
+export interface Group {
   groupId: string;
   groupName: string;
   category: string;
