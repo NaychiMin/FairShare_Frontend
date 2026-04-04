@@ -81,7 +81,7 @@ const ArchivedGroupsPage = () => {
     if (!user?.email || !jwtToken) return;
 
     try {
-      await groupService.unarchiveGroup(target.groupId, jwtToken, user.email);
+      await groupService.unarchiveGroup(String(target.groupId), jwtToken, user.email);
       toast.success("Group unarchived");
       closeConfirm();
       fetchArchived();

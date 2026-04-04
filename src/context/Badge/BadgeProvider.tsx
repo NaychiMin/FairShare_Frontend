@@ -31,7 +31,8 @@ export const BadgeProvider: React.FC<BadgeProviderProps> = ({ children, userId }
                 // Subscribe to badge notifications
                 const unsubscribe = WebSocketService.on(
                     `/topic/users/${userId}/badges`,
-                    (badge: UserBadgeDto) => {
+                    (message: unknown) => {
+                        const badge = message as UserBadgeDto;
                         showBadgePopup(badge);
                     }
                 );

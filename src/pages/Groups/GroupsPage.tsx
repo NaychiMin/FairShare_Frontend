@@ -120,7 +120,7 @@ const GroupsPage = () => {
 
     try {
       await groupService.archiveGroup(
-        archiveTarget.groupId,
+        String(archiveTarget.groupId),
         jwtToken,
         user.email,
       );
@@ -167,7 +167,7 @@ const GroupsPage = () => {
 
     try {
       await groupService.updateGroup(
-        groupId,
+        String(groupId),
         {
           groupName: editForm.groupName,
           category: editForm.category,
@@ -202,7 +202,7 @@ const GroupsPage = () => {
     if (!user?.email || !jwtToken) return;
 
     try {
-      await groupService.deleteGroup(deleteTarget.groupId, jwtToken, user.email);
+      await groupService.deleteGroup(String(deleteTarget.groupId), jwtToken, user.email);
       toast.success("Group deleted");
       handleCloseDelete();
       fetchGroups();
@@ -230,7 +230,7 @@ const GroupsPage = () => {
 
     try {
       const response = (await groupService.createInvite(
-        inviteTarget.groupId,
+        String(inviteTarget.groupId),
         { invitedEmail: inviteEmail },
         jwtToken,
         user.email,
@@ -248,7 +248,7 @@ const GroupsPage = () => {
 
     try {
       const response = (await groupService.createInvite(
-        inviteTarget.groupId,
+        String(inviteTarget.groupId),
         { invitedEmail: null },
         jwtToken,
         user.email,

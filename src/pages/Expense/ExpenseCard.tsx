@@ -26,7 +26,7 @@ import expenseService from '../../services/expenseService';
 interface ExpenseCardProps {
   expense: Expense;
   setExpenseFormOpen: (open: boolean) => void;
-  setEditingExpense: (expense: Expense | null) => void;
+  setEditingExpense: React.Dispatch<React.SetStateAction<Expense | null>>;
 }
 
 const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, setEditingExpense }) => {

@@ -44,6 +44,7 @@ import SettlementForm from '../Expense/SettlementForm';
 import SettlementCard from '../Expense/SettlementCard';
 import { useAuth } from '../../context/Authentication/useAuth';
 import BalanceCard from '../Expense/BalanceCard';
+import type { Expense } from '../../types/Expense';
 
 export interface Group {
   groupId: string;
@@ -80,11 +81,6 @@ interface GroupMemberActionStatus {
   canLeave: boolean;
   canRemove: boolean;
   warningMessage?: string | null;
-}
-
-interface Expense {
-  expenseId: string;
-  [key: string]: unknown;
 }
 
 interface ApiErrorResponse {

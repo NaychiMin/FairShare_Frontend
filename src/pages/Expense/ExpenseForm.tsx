@@ -40,7 +40,7 @@ interface ExpenseFormProps {
   groupName: string;
   members: Member[];
   onExpenseCreated: () => void;
-  expenseToEdit?: Expense; 
+  expenseToEdit?: Expense | null; 
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
