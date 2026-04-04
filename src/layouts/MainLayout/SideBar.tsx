@@ -170,7 +170,6 @@
 
 // export default SideBar;
 
-import React from "react";
 import {
   Drawer,
   Box,
