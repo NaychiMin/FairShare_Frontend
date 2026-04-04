@@ -111,18 +111,19 @@ const SettlementForm: React.FC<SettlementFormProps> = ({
       await settlementService.createSettlement(settlementData, jwtToken!, user!.email);
       onSettlementCreated();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to create settlement:', error);
-      setErrors({ 
-        submit: error.response?.data?.message || 'Failed to create settlement' 
-      });
+      let errorMessage = 'Failed to create settlement';
+  
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        errorMessage = axiosError.response?.data?.message || errorMessage;
+      }
+      
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
-  };
-
-  const getMemberName = (userId: string) => {
-    return members.find(m => m.userId === userId)?.name || 'Unknown';
   };
 
   return (

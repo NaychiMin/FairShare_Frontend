@@ -1,5 +1,5 @@
 import axios from "../api/axios";
-import type { CreateExpenseRequest } from "../types/Expense";
+import type { CreateExpenseRequest, EditExpenseRequest } from "../types/Expense";
 const TOKEN_KEY = "token";
 
 class ExpenseService {
@@ -15,7 +15,7 @@ class ExpenseService {
     return response.data;
   }
 
-  async updateExpense(data: any, jwtToken: string, userEmail: string) {
+  async updateExpense(data: EditExpenseRequest, jwtToken: string, userEmail: string) {
     const response = await axios.put(`/expenses/${data.expenseId}`, data, {
       params: { requesterEmail: userEmail },
       headers: {
