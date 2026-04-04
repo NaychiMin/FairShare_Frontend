@@ -17,28 +17,69 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import groupService from "../../services/groupService";
 import { useAuth } from "../../context/Authentication/useAuth";
 
-const categories = ["Household", "Trip", "Event", "Project", "Other"];
+const categories = ["Household", "Trip", "Event", "Project", "Other"] as const;
+
+interface Group {
+  id?: string | number;
+  groupId?: string | number;
+  groupName?: string;
+  category?: string;
+  isAdmin?: boolean;
+}
+
+interface EditForm {
+  groupName: string;
+  category: string;
+}
+
+interface InviteResponse {
+  inviteLink: string;
+}
+
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+
+  const apiError = err as ApiErrorResponse;
+  return apiError.response?.data?.message ?? fallback;
+};
 
 const GroupsPage = () => {
   const navigate = useNavigate();
   const { user, jwtToken } = useAuth();
-  const [groups, setGroups] = useState<any[]>([]);
 
-  // dialog state
+  const [groups, setGroups] = useState<Group[]>([]);
+
   const [open, setOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ groupName: "", category: "" });
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({
+    groupName: "",
+    category: "",
+  });
+
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Group | null>(null);
+
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const [archiveTarget, setArchiveTarget] = useState<any | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Group | null>(null);
+
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteTarget, setInviteTarget] = useState<any | null>(null);
+  const [inviteTarget, setInviteTarget] = useState<Group | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
 
@@ -46,12 +87,15 @@ const GroupsPage = () => {
     if (!user?.email || !jwtToken) return;
 
     try {
-      const response = await groupService.getAll(user.email, jwtToken);
-      if (response) setGroups(response);
-    } catch (err) {
-      toast.error(
-        (err as any).response?.data?.message || "Failed to fetch groups",
-      );
+      const response = (await groupService.getAll(user.email, jwtToken)) as
+        | Group[]
+        | undefined;
+
+      if (response) {
+        setGroups(response);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to fetch groups"));
     }
   };
 
@@ -60,7 +104,7 @@ const GroupsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleOpenArchive = (group: any) => {
+  const handleOpenArchive = (group: Group) => {
     setArchiveTarget(group);
     setArchiveOpen(true);
   };
@@ -83,14 +127,12 @@ const GroupsPage = () => {
       toast.success("Group archived");
       handleCloseArchive();
       fetchGroups();
-    } catch (err) {
-      toast.error(
-        (err as any).response?.data?.message || "Failed to archive group",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to archive group"));
     }
   };
 
-  const handleOpenEdit = (group: any) => {
+  const handleOpenEdit = (group: Group) => {
     setSelectedGroup(group);
     setEditForm({
       groupName: group.groupName ?? "",
@@ -104,8 +146,13 @@ const GroupsPage = () => {
     setSelectedGroup(null);
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSaveEdit = async () => {
@@ -113,6 +160,7 @@ const GroupsPage = () => {
       toast.error("Missing group id");
       return;
     }
+
     if (!user?.email || !jwtToken) return;
 
     const groupId = selectedGroup.id ?? selectedGroup.groupId;
@@ -120,21 +168,22 @@ const GroupsPage = () => {
     try {
       await groupService.updateGroup(
         groupId,
-        { groupName: editForm.groupName, category: editForm.category },
+        {
+          groupName: editForm.groupName,
+          category: editForm.category,
+        },
         jwtToken,
         user.email,
       );
       toast.success("Group updated");
       handleCloseEdit();
       fetchGroups();
-    } catch (err) {
-      toast.error(
-        (err as any).response?.data?.message || "Failed to update group",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to update group"));
     }
   };
 
-  const handleOpenDelete = (group: any) => {
+  const handleOpenDelete = (group: Group) => {
     setDeleteTarget(group);
     setDeleteOpen(true);
   };
@@ -149,25 +198,20 @@ const GroupsPage = () => {
       toast.error("Missing groupId");
       return;
     }
+
     if (!user?.email || !jwtToken) return;
 
     try {
-      await groupService.deleteGroup(
-        deleteTarget.groupId,
-        jwtToken,
-        user.email,
-      );
+      await groupService.deleteGroup(deleteTarget.groupId, jwtToken, user.email);
       toast.success("Group deleted");
       handleCloseDelete();
       fetchGroups();
-    } catch (err) {
-      toast.error(
-        (err as any).response?.data?.message || "Failed to delete group",
-      );
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to delete group"));
     }
   };
 
-  const handleOpenInvite = (group: any) => {
+  const handleOpenInvite = (group: Group) => {
     setInviteTarget(group);
     setInviteEmail("");
     setGeneratedLink("");
@@ -185,16 +229,17 @@ const GroupsPage = () => {
     if (!inviteTarget?.groupId || !user?.email || !jwtToken) return;
 
     try {
-      const response = await groupService.createInvite(
+      const response = (await groupService.createInvite(
         inviteTarget.groupId,
         { invitedEmail: inviteEmail },
         jwtToken,
-        user.email
-      );
+        user.email,
+      )) as InviteResponse;
+
       toast.success("Invitation created");
       setGeneratedLink(response.inviteLink);
-    } catch (err) {
-      toast.error((err as any).response?.data?.message || "Failed to create invitation");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to create invitation"));
     }
   };
 
@@ -202,16 +247,17 @@ const GroupsPage = () => {
     if (!inviteTarget?.groupId || !user?.email || !jwtToken) return;
 
     try {
-      const response = await groupService.createInvite(
+      const response = (await groupService.createInvite(
         inviteTarget.groupId,
         { invitedEmail: null },
         jwtToken,
-        user.email
-      );
+        user.email,
+      )) as InviteResponse;
+
       toast.success("Invite link generated");
       setGeneratedLink(response.inviteLink);
-    } catch (err) {
-      toast.error((err as any).response?.data?.message || "Failed to create invite link");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to create invite link"));
     }
   };
 
@@ -225,7 +271,7 @@ const GroupsPage = () => {
     <Grid size={12} width={"95%"} ml={2} mt={2}>
       <MenuList>
         {groups.map((group) => (
-          <div key={group.groupId}>
+          <div key={String(group.groupId ?? group.id ?? group.groupName)}>
             <MenuItem
               onClick={() => navigate(`/groups/${group.groupId}`)}
               sx={{
@@ -249,7 +295,6 @@ const GroupsPage = () => {
                 secondary={group.category}
               />
 
-              {/* Put the conditional pencil icon here */}
               {group.isAdmin === true && (
                 <>
                   <IconButton
@@ -262,7 +307,10 @@ const GroupsPage = () => {
                       borderColor: "success.main",
                       borderRadius: "10px",
                       color: "success.main",
-                      "&:hover": { backgroundColor: "success.main", color: "white" },
+                      "&:hover": {
+                        backgroundColor: "success.main",
+                        color: "white",
+                      },
                     }}
                   >
                     <PersonAddAltOutlinedIcon />
@@ -345,7 +393,6 @@ const GroupsPage = () => {
         Add New
       </Button>
 
-      {/* Edit dialog */}
       <Dialog
         open={open}
         onClose={handleCloseEdit}
@@ -392,7 +439,6 @@ const GroupsPage = () => {
           </TextField>
         </DialogContent>
 
-        {/* edit dialog */}
         <DialogActions sx={{ pb: 2, pr: 3 }}>
           <Button onClick={handleCloseEdit}>Cancel</Button>
           <Button
@@ -409,7 +455,6 @@ const GroupsPage = () => {
         </DialogActions>
       </Dialog>
 
-      {/* archive dialog */}
       <Dialog
         open={archiveOpen}
         onClose={handleCloseArchive}
@@ -446,7 +491,6 @@ const GroupsPage = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Delete dialog */}
       <Dialog
         open={deleteOpen}
         onClose={handleCloseDelete}
@@ -500,7 +544,6 @@ const GroupsPage = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Invite dialog */}
       <Dialog
         open={inviteOpen}
         onClose={handleCloseInvite}
@@ -509,7 +552,9 @@ const GroupsPage = () => {
         PaperProps={{ className: "rounded-2xl" }}
       >
         <div className="px-5 pt-5 pb-4">
-          <div className="text-lg font-extrabold text-gray-900">Invite to Group</div>
+          <div className="text-lg font-extrabold text-gray-900">
+            Invite to Group
+          </div>
           <div className="mt-1 text-sm text-gray-500">
             Invite users by email or generate a shareable link.
           </div>
@@ -543,8 +588,12 @@ const GroupsPage = () => {
 
             {generatedLink && (
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
-                <div className="text-xs font-bold text-gray-600">Invite Link</div>
-                <div className="mt-1 break-all text-sm text-gray-800">{generatedLink}</div>
+                <div className="text-xs font-bold text-gray-600">
+                  Invite Link
+                </div>
+                <div className="mt-1 break-all text-sm text-gray-800">
+                  {generatedLink}
+                </div>
                 <Button
                   variant="text"
                   onClick={handleCopyLink}
@@ -561,7 +610,6 @@ const GroupsPage = () => {
           </div>
         </div>
       </Dialog>
-
     </Grid>
   );
 };

@@ -1,30 +1,51 @@
 import { CircularProgress } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import groupService from "../../services/groupService";
 import { useAuth } from "../../context/Authentication/useAuth";
+import groupService from "../../services/groupService";
+
+interface SentInvite {
+  token: string;
+  groupName: string;
+  category?: string;
+  invitedEmail?: string | null;
+  status: string;
+  expiresAt: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 const SentInvitesPage = () => {
   const { user, jwtToken } = useAuth();
-  const [invites, setInvites] = useState<any[]>([]);
+  const [invites, setInvites] = useState<SentInvite[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchSentInvites = async () => {
-    if (!user?.email || !jwtToken) return;
+  const fetchSentInvites = useCallback(async () => {
+    if (!user?.email || !jwtToken) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await groupService.getSentInvites(user.email, jwtToken);
       setInvites(response || []);
-    } catch (err) {
-      toast.error((err as any).response?.data?.message || "Failed to fetch sent invites");
+    } catch (err: unknown) {
+      const error = err as ApiError;
+      toast.error(error.response?.data?.message || "Failed to fetch sent invites");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.email, jwtToken]);
 
   useEffect(() => {
-    fetchSentInvites();
-  }, []);
+    void fetchSentInvites();
+  }, [fetchSentInvites]);
 
   if (loading) {
     return (
@@ -35,7 +56,7 @@ const SentInvitesPage = () => {
   }
 
   return (
-    <div className="w-[95%] ml-4 mt-6">
+    <div className="ml-4 mt-6 w-[95%]">
       <div className="mb-4 text-xl font-extrabold text-gray-900">Sent Invites</div>
 
       {invites.length === 0 ? (

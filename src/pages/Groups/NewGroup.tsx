@@ -5,9 +5,37 @@ import { useNavigate } from 'react-router-dom';
 import groupService from '../../services/groupService';
 import { toast } from 'react-toastify';
 
+interface CreateGroupFormData {
+  groupName: string;
+  category: string;
+}
+
+interface CreateGroupRequest {
+  groupName: string;
+  category: string;
+  admin?: string;
+}
+
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+
+  const apiError = err as ApiErrorResponse;
+  return apiError.response?.data?.message ?? fallback;
+};
+
 const CreateGroupForm = () => {
   const { user, jwtToken } = useAuth();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateGroupFormData>({
     groupName: '',
     category: '',
   });
@@ -19,33 +47,40 @@ const CreateGroupForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // This matches your MySQL schema structure
-    const newGroup = {
+
+    const newGroup: CreateGroupRequest = {
       ...formData,
-     // admin: user?.name
-      admin: user?.email
+      admin: user?.email,
     };
 
-    console.log("Submitting to MySQL:", newGroup);
+    console.log('Submitting to MySQL:', newGroup);
+
     try {
-          const response = await groupService.create(newGroup, jwtToken || "");
-          if (response) {
-            toast.success("Successfully created group.")
-            navigate("/groups");
-          }
-        } catch (err) {
-          toast.error((err as any).response?.data?.message || "Failed to create group");
-        }
+      const response = await groupService.create(newGroup, jwtToken || '');
+      if (response) {
+        toast.success('Successfully created group.');
+        navigate('/groups');
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, 'Failed to create group'));
+    }
   };
 
   return (
     <Box p={3} width={'100%'} mt={2}>
-      <Typography variant="h5" gutterBottom>Create a New Group</Typography>
-      <br /><br />
-      <Box component="form" onSubmit={handleSubmit} width={'80%'} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Create a New Group
+      </Typography>
+      <br />
+      <br />
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        width={'80%'}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
         <TextField
           label="Group Name"
           name="groupName"
@@ -72,10 +107,10 @@ const CreateGroupForm = () => {
           ))}
         </TextField>
         <br />
-        
-        <Button 
-          type="submit" 
-          variant="contained" 
+
+        <Button
+          type="submit"
+          variant="contained"
           size="large"
           sx={{ width: '130px' }}
           disabled={!formData.groupName}

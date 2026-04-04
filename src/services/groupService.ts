@@ -1,27 +1,44 @@
 import axios from "../api/axios";
+
 const TOKEN_KEY = "token";
+
+/* ================= TYPES ================= */
+
+interface CreateGroupRequest {
+  groupName: string;
+  category: string;
+  admin?: string;
+}
+
+interface UpdateGroupRequest {
+  groupName: string;
+  category: string;
+}
+
+interface InviteRequest {
+  invitedEmail: string | null;
+}
 
 class GroupService {
 
-  async create(data: any, jwtToken: string) {
+  async create(data: CreateGroupRequest, jwtToken: string) {
     const response = await axios.post(`/group/create-new-group`, data, {
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   }
 
-  async getAll(email: any, jwtToken: string) {
+  async getAll(email: string, jwtToken: string) {
     const response = await axios.get(`/group/all/${email}`, {
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-      });
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
     return response.data;
   }
-
 
   async getArchived(email: string, jwtToken: string) {
     const response = await axios.get(`/group/archived/${email}`, {
@@ -54,12 +71,17 @@ class GroupService {
     return response.data;
   }
 
-  async updateGroup(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
+  async updateGroup(
+    groupId: string,
+    data: UpdateGroupRequest,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
     const response = await axios.put(`/group/${groupId}`, data, {
-      params: { requesterEmail }, // matches your controller @RequestParam
+      params: { requesterEmail },
       headers: {
-        'Authorization': `Bearer ${jwtToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
       },
     });
     return response.data;
@@ -79,30 +101,32 @@ class GroupService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
-  // Get group details to be displayed on group page
   async getGroupById(groupId: string, jwtToken: string, userEmail: string) {
     const response = await axios.get(`/group/${groupId}`, {
-      params: { requesterEmail: userEmail }, 
+      params: { requesterEmail: userEmail },
       headers: {
-        'Authorization': `Bearer ${jwtToken}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
     });
     return response.data;
   }
 
-  // Get group members to be displayed on group page
   async getGroupMembers(groupId: string, jwtToken: string, userEmail: string) {
     const response = await axios.get(`/group/${groupId}/members`, {
-      params: { requesterEmail: userEmail }, 
+      params: { requesterEmail: userEmail },
       headers: {
-        'Authorization': `Bearer ${jwtToken}`,
+        Authorization: `Bearer ${jwtToken}`,
       },
     });
     return response.data;
   }
 
-
-   async removeGroupMember(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+  async removeGroupMember(
+    groupId: string,
+    userId: string,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
     const response = await axios.delete(`/group/${groupId}/members/${userId}`, {
       params: { requesterEmail },
       headers: {
@@ -112,7 +136,12 @@ class GroupService {
     return response.data;
   }
 
-  async createInvite(groupId: string, data: any, jwtToken: string, requesterEmail: string) {
+  async createInvite(
+    groupId: string,
+    data: InviteRequest,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
     const response = await axios.post(`/group/${groupId}/invite`, data, {
       params: { requesterEmail },
       headers: {
@@ -155,7 +184,12 @@ class GroupService {
     return response.data;
   }
 
-  async assignAdmin(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+  async assignAdmin(
+    groupId: string,
+    userId: string,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
     const response = await axios.put(
       `/group/${groupId}/members/${userId}/assign-admin`,
       null,
@@ -169,7 +203,12 @@ class GroupService {
     return response.data;
   }
 
-  async revokeAdmin(groupId: string, userId: string, jwtToken: string, requesterEmail: string) {
+  async revokeAdmin(
+    groupId: string,
+    userId: string,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
     const response = await axios.put(
       `/group/${groupId}/members/${userId}/revoke-admin`,
       null,
@@ -183,17 +222,22 @@ class GroupService {
     return response.data;
   }
 
-
-  async getGroupMemberActionStatus(groupId: string, jwtToken: string, requesterEmail: string) {
-  const response = await axios.get(`/group/${groupId}/members/action-status`, {
-    params: { requesterEmail },
-    headers: {
-      Authorization: `Bearer ${jwtToken}`,
-    },
-  });
-  return response.data;
-}
-
+  async getGroupMemberActionStatus(
+    groupId: string,
+    jwtToken: string,
+    requesterEmail: string
+  ) {
+    const response = await axios.get(
+      `/group/${groupId}/members/action-status`,
+      {
+        params: { requesterEmail },
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }
+    );
+    return response.data;
+  }
 }
 
 export default new GroupService();
