@@ -118,7 +118,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchBadges();
-  }, []);
+  }, [user.email]);
 
   return (
     <div className="full-page-body">
