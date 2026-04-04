@@ -25,10 +25,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Install Rollup Linux native dependency
-        run: npm install @rollup/rollup-linux-x64-gnu --no-save
+      - name: Install required Linux native dependencies
+        run: npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu --no-save
 
       - name: Run lint
         run: npm run lint
