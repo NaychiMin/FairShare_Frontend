@@ -24,19 +24,36 @@ import {
   AttachMoney as MoneyIcon,
   CreditCard as CreditCardIcon,
   Notes as NotesIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import settlementService from '../../services/settlementService';
 import { useAuth } from '../../context/Authentication/useAuth';
 
+interface Settlement {
+  settlementId: string;
+  groupId: string;
+  groupName: string;
+  fromUserId: string;
+  fromUserName: string;
+  fromUserEmail: string;
+  toUserId: string;
+  toUserName: string;
+  toUserEmail: string;
+  amount: number;
+  settlementDate: string;
+  paymentMethod?: string;
+  notes?: string;
+  createdBy?: string;
+  createdByName: string;
+  createdAt: string;
+  status?: string;
+}
+
 const SettlementDetailsPage: React.FC = () => {
   const { settlementId } = useParams<{ settlementId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { jwtToken } = useAuth();
-  const [settlement, setSettlement] = useState<any>(null);
+  const { user, jwtToken } = useAuth();
+  const [settlement, setSettlement] = useState<Settlement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

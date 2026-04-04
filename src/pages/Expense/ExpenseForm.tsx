@@ -25,7 +25,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import expenseService from '../../services/expenseService';
 import { useAuth } from '../../context/Authentication/useAuth';
-import type { CreateExpenseRequest, EditExpenseRequest } from '../../types/Expense';
+import type { CreateExpenseRequest, EditExpenseRequest, Expense } from '../../types/Expense';
 
 interface Member {
   userId: string;
@@ -40,7 +40,7 @@ interface ExpenseFormProps {
   groupName: string;
   members: Member[];
   onExpenseCreated: () => void;
-  expenseToEdit?: any; // Optional prop for editing existing expense
+  expenseToEdit?: Expense; 
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
@@ -83,7 +83,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       setDescription(expenseToEdit.description);
       setAmount(expenseToEdit.amount);
       setPaidBy(expenseToEdit.paidByUserId);
-      setParticipants(expenseToEdit.splits.map((s: any) => s.userId));
+      setParticipants(expenseToEdit.splits.map((s: { userId: string }) => s.userId));
       setExpenseDate(new Date(expenseToEdit.expenseDate));
       setNotes(expenseToEdit.notes || '');
     }

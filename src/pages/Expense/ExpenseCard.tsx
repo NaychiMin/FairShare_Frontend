@@ -5,7 +5,6 @@ import {
   Chip,
   Avatar,
   Paper,
-  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -26,8 +25,8 @@ import expenseService from '../../services/expenseService';
 
 interface ExpenseCardProps {
   expense: Expense;
-  setExpenseFormOpen: any;
-  setEditingExpense: any;
+  setExpenseFormOpen: (open: boolean) => void;
+  setEditingExpense: (expense: Expense | null) => void;
 }
 
 const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, setEditingExpense }) => {
@@ -46,6 +45,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, 
       await expenseService.deleteExpense(expense.expenseId, jwtToken!, user!.email);
       toast.success("Expense deleted successfully");
     } catch (error) {
+      console.error('Delete failed:', error);
       toast.error("Failed to delete expense");
     } finally {
       setDeleteDialogOpen(false);

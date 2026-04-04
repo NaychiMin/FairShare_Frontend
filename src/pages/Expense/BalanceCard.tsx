@@ -31,24 +31,43 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ groupId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // useEffect(() => {
+  //   if (groupId && user?.email) {
+  //     fetchBalance();
+  //   }
+  // }, [groupId, user]);
+
+  // const fetchBalance = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken!, user!.email);
+  //     setBalance(data);
+  //   } catch (err) {
+  //     console.error('Failed to fetch balance:', err);
+  //     setError('Could not load balance information');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        setLoading(true);
+        const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken!, user!.email);
+        setBalance(data);
+      } catch (err) {
+        console.error('Failed to fetch balance:', err);
+        setError('Could not load balance information');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (groupId && user?.email) {
       fetchBalance();
     }
-  }, [groupId, user]);
-
-  const fetchBalance = async () => {
-    try {
-      setLoading(true);
-      const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken!, user!.email);
-      setBalance(data);
-    } catch (err) {
-      console.error('Failed to fetch balance:', err);
-      setError('Could not load balance information');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [groupId, user, jwtToken]);
 
   if (loading) {
     return (
