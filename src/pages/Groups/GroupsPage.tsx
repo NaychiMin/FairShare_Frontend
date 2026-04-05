@@ -17,12 +17,14 @@ import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import { Chip } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import groupService from "../../services/groupService";
 import { useAuth } from "../../context/Authentication/useAuth";
+import notificationService from "../../services/notificationService";
 
 const categories = ["Household", "Trip", "Event", "Project", "Other"] as const;
 
@@ -94,6 +96,21 @@ const GroupsPage = () => {
       Record<string, GroupActionStatus>
     >({});
 
+  const [unreadByGroup, setUnreadByGroup] = useState<Record<string, number>>({});
+
+  const fetchUnreadByGroup = async () => {
+    if (!jwtToken || !user?.email) return;
+
+    const data = await notificationService.getUnreadByGroup(jwtToken, user.email);
+    const map = Object.fromEntries(
+      data.map((item: { groupId: string; unreadCount: number }) => [
+        item.groupId,
+        item.unreadCount,
+      ])
+    );
+    setUnreadByGroup(map);
+  };
+
   const fetchGroups = async () => {
     if (!user?.email || !jwtToken) return;
 
@@ -115,6 +132,18 @@ const GroupsPage = () => {
     fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!jwtToken || !user?.email) return;
+
+    fetchUnreadByGroup();
+
+    const interval = setInterval(() => {
+      fetchUnreadByGroup();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [jwtToken, user?.email]);
 
 
   const fetchActionStatuses = async (groupList: Group[]) => {
@@ -468,6 +497,7 @@ const GroupsPage = () => {
 
                 </>
               )}
+
             </MenuItem>
             <Divider />
           </div>

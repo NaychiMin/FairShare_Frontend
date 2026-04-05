@@ -154,7 +154,7 @@ const ArchivedGroupsPage = () => {
     <Grid size={12} width={"95%"} ml={2} mt={2}>
       <MenuList>
         {groups.map((group) => (
-          <div key={String(group.groupId ?? group.id ?? group.groupName)}>
+          <div key={String(group.groupId ?? group.groupId ?? group.groupName)}>
             <MenuItem
               sx={{
                 display: "flex",
@@ -171,26 +171,6 @@ const ArchivedGroupsPage = () => {
                 primary={<span style={{ fontWeight: 700 }}>{group.groupName}</span>}
                 secondary={<span style={{ color: "#777" }}>{group.category}</span>}
               />
-{/* 
-              {group.isAdmin === true && (
-                <IconButton
-                  onClick={() => openConfirm(group)}
-                  sx={{
-                    border: "1px solid",
-                    borderColor: "primary.main",
-                    borderRadius: "8px",
-                    color: "primary.main",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: "primary.main",
-                      color: "white",
-                    },
-                  }}
-                >
-                  <RestoreOutlinedIcon />
-                </IconButton>
-              )} */}
-
 
 
               {group.isAdmin === true && (
