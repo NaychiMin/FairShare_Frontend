@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/Authentication/useAuth';
 import feedService from '../../services/feedService';
