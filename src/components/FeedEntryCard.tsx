@@ -24,10 +24,6 @@ const FeedEntryCard = ({ entry }: Props) => {
             <Typography variant="body2" color="text.secondary">
               Amount: ${expenseAdded?.amount}
             </Typography>
-
-            <Typography variant="caption" color="text.secondary">
-              {new Date(expenseAdded?.createdAt).toLocaleString()}
-            </Typography>
           </>
         );
 

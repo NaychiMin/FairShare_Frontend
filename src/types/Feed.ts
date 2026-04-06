@@ -20,6 +20,7 @@ export interface FeedPage {
   totalPages: number;
   number: number;
   size: number;
+  last: boolean;
 }
 
 export interface FeedEntryFilteredRequestDto {

@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/Authentication/useAuth';
 import feedService from '../../services/feedService';
 import FeedEntryCard from '../../components/FeedEntryCard';
-import { Container } from '@mui/material';
+import { CircularProgress, Container } from '@mui/material';
 
 const PAGE_SIZE = 2;
 
@@ -12,9 +12,12 @@ const useFeed = (userId: string) => {
     queryKey: ['feed', userId],
     queryFn: ({ pageParam = 0 }) =>
       feedService.getFeed(pageParam, PAGE_SIZE, userId),
-
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.last) return undefined;
+      return lastPage.number + 1;
+    },
     initialPageParam: 0,
+    enabled: !!userId,
   });
 };
 
@@ -30,6 +33,7 @@ const DashboardPage = () => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!loadMoreRef.current) return;
     if (!hasNextPage) return;
 
     const observer = new IntersectionObserver(
@@ -38,18 +42,22 @@ const DashboardPage = () => {
           fetchNextPage();
         }
       },
-      { threshold: 1 }
+      {
+        root: null, // use viewport scroll
+        rootMargin: '200px', // trigger before reaching bottom
+        threshold: 0.1, // 10% visible
+      }
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
+    observer.observe(loadMoreRef.current);
 
-    return () => observer.disconnect();
-  }, [hasNextPage, fetchNextPage]);
+    return () => {
+      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, data]);
 
-
-  const feedEntries = data?.pages.flatMap(page => page.rows) ?? [];
+  const feedEntries = data?.pages.flatMap(page => page.content) ?? [];
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -58,9 +66,10 @@ const DashboardPage = () => {
       ))}
 
       {/* Loader trigger */}
-      <div ref={loadMoreRef} />
+      <div ref={loadMoreRef} style={{ height: 40 }} />
 
-      {isFetchingNextPage && <p>Loading more...</p>}
+      {isFetchingNextPage && <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}><CircularProgress size="3rem" /></div>}
+      
     </Container>
   );
 };
