@@ -29,4 +29,20 @@ export interface FeedEntryFilteredRequestDto {
   size: number;
   sortBy: string;
   direction: string;
+  types: FeedEntryType[] | null;
 }
+
+export type FeedEntryType =
+  | 'EXPENSE_ADDED'
+  | 'SETTLEMENT_ADDED'
+  | 'BADGE_EARNED'
+  | 'GROUP_UPDATE'
+  | 'GROUP_ALL_SETTLED';
+
+export const FEED_ENTRY_TYPES: FeedEntryType[] = [
+  'EXPENSE_ADDED',
+  'SETTLEMENT_ADDED',
+  'BADGE_EARNED',
+  'GROUP_UPDATE',
+  'GROUP_ALL_SETTLED'
+];
