@@ -47,6 +47,20 @@ const FeedEntryCard = ({ entry }: Props) => {
             </Typography> */}
           </>
         );
+      
+      case "GROUP_ALL_SETTLED":
+        return (
+          <>
+            <Typography variant="h6">
+              💰 Group all Settled
+            </Typography>
+
+            <Typography variant="body1">
+              {group?.groupName} is now fully settled!
+            </Typography>
+            
+          </>
+        );
 
       default:
         return (
