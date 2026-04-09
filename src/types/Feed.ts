@@ -9,6 +9,7 @@ export interface FeedEntry {
   expenseAdded?: Expense;
   settlementAdded?: SettlementResponse;
   userBadgeEarned?: UserBadgeDto;
+  groupSettled?: any;
   group?: { groupName: string, category: string };
   groupUpdatedFieldOld?: string;
   groupUpdatedFieldNew?: string;

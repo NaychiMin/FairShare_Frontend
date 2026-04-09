@@ -6,7 +6,7 @@ type Props = {
 };
 
 const FeedEntryCard = ({ entry }: Props) => {
-  const { feedEntryType, expenseAdded, userBadgeEarned, group } = entry;
+  const { feedEntryType, expenseAdded, userBadgeEarned, groupSettled, group } = entry;
 
   const renderContent = () => {
     switch (feedEntryType) {
@@ -56,9 +56,9 @@ const FeedEntryCard = ({ entry }: Props) => {
             </Typography>
 
             <Typography variant="body1">
-              {group?.groupName} is now fully settled!
+              {groupSettled?.groupName} is now fully settled!
             </Typography>
-            
+
           </>
         );
 
