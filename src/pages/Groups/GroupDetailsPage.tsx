@@ -45,6 +45,7 @@ import SettlementCard from '../Expense/SettlementCard';
 import { useAuth } from '../../context/Authentication/useAuth';
 import BalanceCard from '../Expense/BalanceCard';
 import type { Expense } from '../../types/Expense';
+import EditSettlementModal from '../Expense/EditSettlementModal';
 
 export interface Group {
   groupId: string;
@@ -147,6 +148,8 @@ const GroupDetailsPage: React.FC = () => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedSettlementId, setSelectedSettlementId] = useState<string | null>(null);
+  const [editSettlementModalOpen, setEditSettlementModalOpen] = useState(false);
+  const [selectedSettlement, setSelectedSettlement] = useState<Settlement | null>(null);
 
   useEffect(() => {
     if (groupId && jwtToken && user?.email) {
@@ -237,6 +240,17 @@ const GroupDetailsPage: React.FC = () => {
       console.error('Failed to delete settlement:', err);
       toast.error('Failed to delete settlement');
     }
+  };
+
+  const handleEditSettlement = (settlement: Settlement) => {
+    setSelectedSettlement(settlement);
+    setEditSettlementModalOpen(true);
+  };
+
+  const handleSettlementUpdated = async () => {
+    await Promise.all([fetchSettlements(), fetchGroupMemberActionStatuses()]);
+    setEditSettlementModalOpen(false);
+    setSelectedSettlement(null);
   };
 
   const leaveGroup = async () => {
@@ -667,14 +681,18 @@ const GroupDetailsPage: React.FC = () => {
       <TabPanel value={tabValue} index={2}>
         {settlements.length > 0 ? (
           <Box>
+            // In GroupDetailsPage.tsx, the SettlementCard usage:
             {settlements.map((settlement) => (
               <SettlementCard
                 key={settlement.settlementId}
                 settlement={settlement}
+                onEdit={() => handleEditSettlement(settlement)}
                 onDelete={(settlementId: string) => {
                   setSelectedSettlementId(settlementId);
                   setDeleteDialogOpen(true);
                 }}
+                currentUserId={user?.userId}
+                //isDeleting={deleting && selectedSettlementId === settlement.settlementId}  // Optional: show loading on specific card
               />
             ))}
           </Box>
@@ -728,6 +746,15 @@ const GroupDetailsPage: React.FC = () => {
           groupName={group.groupName}
           members={members}
           onSettlementCreated={handleSettlementCreated}
+        />
+      )}
+
+      {selectedSettlement && (
+        <EditSettlementModal
+          open={editSettlementModalOpen}
+          onClose={() => setEditSettlementModalOpen(false)}
+          settlement={selectedSettlement}
+          onSettlementUpdated={handleSettlementUpdated}
         />
       )}
 

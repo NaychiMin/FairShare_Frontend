@@ -5,14 +5,11 @@ import {
   Typography,
   Chip,
   Avatar,
-  IconButton,
-  Menu,
-  MenuItem,
+  CircularProgress
 } from '@mui/material';
 import {
   Payment as PaymentIcon,
   ArrowForward as ArrowIcon,
-  MoreVert as MoreIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
@@ -32,66 +29,78 @@ interface SettlementCardProps {
     notes?: string;
     createdByName: string;
   };
-  onEdit?: (settlementId: string) => void;
-  onDelete?: (settlementId: string) => void;
-  onClick?: (settlementId: string) => void; 
+  onEdit: (settlement: {
+    settlementId: string;
+    fromUserName: string;
+    toUserName: string;
+    amount: number;
+    settlementDate: string;
+    paymentMethod?: string;
+    notes?: string;
+  }) => void;
+  onDelete: (settlementId: string) => void;
+  currentUserId?: string;
+  isDeleting?: boolean;  // Add this to show loading state
 }
 
-const SettlementCard: React.FC<SettlementCardProps> = ({ 
-  settlement, 
-  onEdit, 
+const SettlementCard: React.FC<SettlementCardProps> = ({
+  settlement,
+  onEdit,
   onDelete,
-  onClick 
+  currentUserId,
+  isDeleting = false
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if (e.target instanceof Element && e.target.closest('.MuiMenu-paper')) {
-      return;
-    }
-    if (onClick) {
-      onClick(settlement.settlementId);
-    } else {
-      navigate(`/settlements/${settlement.settlementId}`);
-    }
+    const target = e.target as HTMLElement;
+    if (target.closest('.action-button')) return;
+    navigate(`/settlements/${settlement.settlementId}`);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(settlement);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(settlement.settlementId);  // Just call parent, let parent handle dialog
   };
+
+  const isUserPayer = currentUserId === settlement.fromUserId;
+  const isUserReceiver = currentUserId === settlement.toUserId;
 
   return (
     <Paper
+      elevation={0}
+      onClick={handleCardClick}
       sx={{
         p: 2,
         mb: 2,
         backgroundColor: 'white',
         borderRadius: '12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        transition: 'all 0.2s ease',
         cursor: 'pointer',
+        transition: 'all 0.2s ease',
         '&:hover': {
           boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
           transform: 'translateY(-2px)',
         },
       }}
-      onClick={handleCardClick}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* Left section */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
           <Avatar sx={{ bgcolor: 'success.light' }}>
             <PaymentIcon />
           </Avatar>
 
-          <Box sx={{ flex: 1 }}>
-            {/* Payment flow: From & To */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Payment:
+              </Typography>
               <Chip
                 avatar={<Avatar sx={{ width: 24, height: 24 }}>{settlement.fromUserName.charAt(0)}</Avatar>}
                 label={settlement.fromUserName}
@@ -105,67 +114,72 @@ const SettlementCard: React.FC<SettlementCardProps> = ({
                 size="small"
                 variant="outlined"
               />
-              <Chip
-                label={`$${settlement.amount.toFixed(2)}`}
-                color="primary"
-                size="small"
-                sx={{ ml: 1 }}
-              />
             </Box>
 
-            {/* Payment details */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                {format(new Date(settlement.settlementDate), 'MMM d, yyyy')}
-              </Typography>
-              {settlement.paymentMethod && (
-                <>
-                  <Typography variant="body2" color="text.secondary">•</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {settlement.paymentMethod}
-                  </Typography>
-                </>
-              )}
-            </Box>
+            <Typography variant="body2" color="text.secondary">
+              {format(new Date(settlement.settlementDate), 'MMM d, yyyy')}
+              {settlement.paymentMethod && ` • ${settlement.paymentMethod}`}
+            </Typography>
 
-            {/* Notes if any */}
             {settlement.notes && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
                 Note: {settlement.notes}
               </Typography>
             )}
 
-            {/* Recorded by */}
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
               Recorded by {settlement.createdByName}
             </Typography>
           </Box>
         </Box>
 
-        {/* Actions menu (for edit/delete) */}
-        {(onEdit || onDelete) && (
-          <>
-            <IconButton size="small" onClick={handleMenuOpen}>
-              <MoreIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
+        {/* Right section - Amount and Action Buttons */}
+        <Box sx={{ textAlign: 'right', display: 'flex', justifyContent: 'space-between', my: 'auto' }}>
+          <Box sx={{ my: 'auto', mr: 2 }}>
+            <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
+              ${settlement.amount.toFixed(2)}
+            </Typography>
+            {isUserPayer && (
+              <Typography variant="body2" color="error.main">
+                You paid
+              </Typography>
+            )}
+            {isUserReceiver && (
+              <Typography variant="body2" color="success.main">
+                You received
+              </Typography>
+            )}
+          </Box>
+
+          {/* Action Buttons */}
+          <Box display="flex" alignItems="center" justifyContent="center" sx={{ ml: 1 }}>
+            <Avatar
+              className="action-button"
+              sx={{
+                bgcolor: 'white',
+                border: '1px solid #1976d2',
+                mr: 1,
+                cursor: 'pointer',
+                ":hover": { bgcolor: '#E6F8FF' }
+              }}
+              onClick={handleEdit}
             >
-              {onEdit && (
-                <MenuItem onClick={() => { handleMenuClose(); onEdit(settlement.settlementId); }}>
-                  <EditIcon sx={{ mr: 1, fontSize: 18 }} /> Edit
-                </MenuItem>
-              )}
-              {onDelete && (
-                <MenuItem onClick={() => { handleMenuClose(); onDelete(settlement.settlementId); }} sx={{ color: 'error.main' }}>
-                  <DeleteIcon sx={{ mr: 1, fontSize: 18 }} /> Delete
-                </MenuItem>
-              )}
-            </Menu>
-          </>
-        )}
+              <EditIcon fontSize="small" color="primary" />
+            </Avatar>
+            <Avatar
+              className="action-button"
+              sx={{
+                bgcolor: 'white',
+                border: '1px solid red',
+                cursor: 'pointer',
+                ":hover": { bgcolor: '#FFEAE6' }
+              }}
+              onClick={handleDeleteClick}
+            >
+              {isDeleting ? <CircularProgress size={16} color="error" /> : <DeleteIcon fontSize="small" color="error" />}
+            </Avatar>
+          </Box>
+        </Box>
       </Box>
     </Paper>
   );
