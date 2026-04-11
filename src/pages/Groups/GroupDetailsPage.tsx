@@ -691,8 +691,7 @@ const GroupDetailsPage: React.FC = () => {
                   setSelectedSettlementId(settlementId);
                   setDeleteDialogOpen(true);
                 }}
-                currentUserId={user?.userId}
-                //isDeleting={deleting && selectedSettlementId === settlement.settlementId}  // Optional: show loading on specific card
+                currentUserId={user?.userId}                
               />
             ))}
           </Box>
