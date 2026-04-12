@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '../../context/Authentication/useAuth';
 import feedService from '../../services/feedService';
 import FeedEntryCard from '../../components/FeedEntryCard';
-import { Checkbox, CircularProgress, Container, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select } from '@mui/material';
+import { Box, Checkbox, Chip, CircularProgress, Container, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select } from '@mui/material';
 import { FEED_ENTRY_TYPES, type FeedEntryType } from '../../types/Feed';
 
 const PAGE_SIZE = 2;
@@ -65,6 +65,14 @@ const DashboardPage = () => {
 
   const feedEntries = data?.pages.flatMap(page => page.content) ?? [];
 
+  const formatFeedType = (type: string): string => {
+    return type
+      .toLowerCase()
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <FormControl sx={{ mb: 3, minWidth: 250 }}>
@@ -75,12 +83,18 @@ const DashboardPage = () => {
           value={selectedTypes}
           onChange={(e) => setSelectedTypes(e.target.value as FeedEntryType[])}
           input={<OutlinedInput label="Feed Types" />}
-          renderValue={(selected) => selected.join(', ')}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {(selected as FeedEntryType[]).map((value) => (
+                <Chip key={value} label={formatFeedType(value)} />
+              ))}
+            </Box>
+          )}
         >
           {FEED_ENTRY_TYPES.map((type) => (
             <MenuItem key={type} value={type}>
               <Checkbox checked={selectedTypes.includes(type)} />
-              <ListItemText primary={type} />
+              <ListItemText primary={formatFeedType(type)} />
             </MenuItem>
           ))}
         </Select>

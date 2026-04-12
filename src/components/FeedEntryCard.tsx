@@ -13,15 +13,11 @@ const FeedEntryCard = ({ entry }: Props) => {
       case "EXPENSE_ADDED":
         return (
           <>
-            <Typography variant="h6">
-              💸 Expense Added
+            <Typography variant="h6" fontWeight="bold">
+              💸 Expense Added: {expenseAdded?.description}
             </Typography>
 
-            <Typography variant="body1">
-              {expenseAdded?.description}
-            </Typography>
-
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="caption" color="text.secondary">
               Amount: ${expenseAdded?.amount}
             </Typography>
           </>
@@ -30,16 +26,37 @@ const FeedEntryCard = ({ entry }: Props) => {
       case "BADGE_EARNED":
         return (
           <>
-            <Typography variant="h6">
-              🏅 Badge Earned
+            <Typography variant="h6" fontWeight="bold">
+              🏅 Badge Earned!
             </Typography>
 
-            <Typography variant="body1">
+            <Typography variant="body1" fontWeight="bold">
               {userBadgeEarned?.badge?.name}
             </Typography>
 
-            <Typography variant="body2" color="text.secondary">
-              {userBadgeEarned?.badge?.description}
+            <Typography variant="caption" color="text.secondary">
+              {userBadgeEarned?.badge?.description?.replaceAll('You', userBadgeEarned.user.name).replaceAll('you', userBadgeEarned.user.name).replaceAll('have', 'has')}
+            </Typography>
+
+            {/* <Typography variant="caption" color="text.secondary">
+              {new Date(userBadgeEarned?.createdAt).toLocaleString()}
+            </Typography> */}
+          </>
+        );
+
+      case "GROUP_ALL_SETTLED":
+        return (
+          <>
+            <Typography variant="h6" color='success' fontWeight="bold">
+              ✅ {entry.group?.groupName} All Settled
+            </Typography>
+
+            <Typography variant="body1">
+              The balance in {entry.group?.groupName} is 0!
+            </Typography>
+
+            <Typography variant="caption" color="text.secondary">
+              Great job!
             </Typography>
 
             {/* <Typography variant="caption" color="text.secondary">
@@ -64,8 +81,7 @@ const FeedEntryCard = ({ entry }: Props) => {
           {/* Group */}
           {group && (
             <Stack direction="row" spacing={1} alignItems="center">
-              <Chip label={group.groupName} size="small" />
-              <Chip label={group.category} size="small" variant="outlined" />
+              <Chip label={group.groupName} size="small" color="primary"/>
             </Stack>
           )}
 
