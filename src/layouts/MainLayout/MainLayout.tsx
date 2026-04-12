@@ -42,6 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           display: "flex", // force normal flow, not flex
           textAlign: "left",
           paddingTop: "60px",
+          overflowY: "scroll",
           // marginLeft: `${isMobile ? 0 : collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH}px`,
         }}
       >
