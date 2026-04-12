@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -16,58 +16,44 @@ import {
 import {
   ArrowUpward as OweIcon,
   ArrowDownward as OwedIcon,
-  AccountBalanceWallet as BalanceIcon
+  AccountBalanceWallet as BalanceIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import balanceService, { type GroupBalanceResponse } from '../../services/balanceService';
 import { useAuth } from '../../context/Authentication/useAuth';
 
 interface BalanceCardProps {
   groupId: string;
+  refreshTrigger?: number;
 }
 
-const BalanceCard: React.FC<BalanceCardProps> = ({ groupId }) => {
+const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, refreshTrigger }) => {
   const { user, jwtToken } = useAuth();
   const [balance, setBalance] = useState<GroupBalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  // useEffect(() => {
-  //   if (groupId && user?.email) {
-  //     fetchBalance();
-  //   }
-  // }, [groupId, user]);
-
-  // const fetchBalance = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken!, user!.email);
-  //     setBalance(data);
-  //   } catch (err) {
-  //     console.error('Failed to fetch balance:', err);
-  //     setError('Could not load balance information');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const fetchBalance = useCallback(async () => {
+    if (!groupId || !user?.email || !jwtToken) return;
+    
+    try {
+      setRefreshing(true);
+      const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken, user.email);
+      setBalance(data);
+      setError('');
+    } catch (err) {
+      console.error('Failed to fetch balance:', err);
+      setError('Could not load balance information');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [groupId, user?.email, jwtToken]);
 
   useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        setLoading(true);
-        const data = await balanceService.getUserBalanceInGroup(groupId, jwtToken!, user!.email);
-        setBalance(data);
-      } catch (err) {
-        console.error('Failed to fetch balance:', err);
-        setError('Could not load balance information');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (groupId && user?.email) {
-      fetchBalance();
-    }
-  }, [groupId, user, jwtToken]);
+    fetchBalance();
+  }, [fetchBalance, refreshTrigger]);
 
   if (loading) {
     return (
@@ -95,10 +81,20 @@ const BalanceCard: React.FC<BalanceCardProps> = ({ groupId }) => {
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <BalanceIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6">Your Balance</Typography>
+        {/* Header with Refresh Button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <BalanceIcon sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6">Your Balance</Typography>
+          </Box>
+          <Chip
+            icon={<RefreshIcon />}
+            label={refreshing ? 'Refreshing...' : 'Refresh'}
+            size="small"
+            onClick={fetchBalance}
+            disabled={refreshing}
+            sx={{ cursor: 'pointer' }}
+          />
         </Box>
 
         {/* Net Balance */}

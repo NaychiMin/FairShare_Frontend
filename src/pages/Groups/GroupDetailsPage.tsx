@@ -150,6 +150,7 @@ const GroupDetailsPage: React.FC = () => {
   const [selectedSettlementId, setSelectedSettlementId] = useState<string | null>(null);
   const [editSettlementModalOpen, setEditSettlementModalOpen] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState<Settlement | null>(null);
+  const [balanceRefreshTrigger, setBalanceRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (groupId && jwtToken && user?.email) {
@@ -229,10 +230,15 @@ const GroupDetailsPage: React.FC = () => {
     }
   };
 
+  const refreshBalance = () => {
+    setBalanceRefreshTrigger(prev => prev + 1);
+  };
+
   const handleDeleteSettlement = async (settlementId: string) => {
     try {
       await settlementService.deleteSettlement(settlementId, jwtToken!, user!.email);
       await Promise.all([fetchSettlements(), fetchGroupMemberActionStatuses()]);
+      refreshBalance();
       setDeleteDialogOpen(false);
       setSelectedSettlementId(null);
       toast.success('Settlement deleted successfully');
@@ -244,11 +250,13 @@ const GroupDetailsPage: React.FC = () => {
 
   const handleEditSettlement = (settlement: Settlement) => {
     setSelectedSettlement(settlement);
+    refreshBalance();
     setEditSettlementModalOpen(true);
   };
 
   const handleSettlementUpdated = async () => {
     await Promise.all([fetchSettlements(), fetchGroupMemberActionStatuses()]);
+    refreshBalance();
     setEditSettlementModalOpen(false);
     setSelectedSettlement(null);
   };
@@ -294,12 +302,14 @@ const GroupDetailsPage: React.FC = () => {
 
   const handleExpenseCreated = async () => {
     await Promise.all([fetchGroupExpenses(), fetchGroupMemberActionStatuses()]);
+    refreshBalance();
     setExpenseFormOpen(false);
     setEditingExpense(null);
   };
 
   const handleSettlementCreated = async () => {
     await Promise.all([fetchSettlements(), fetchGroupMemberActionStatuses()]);
+    refreshBalance();
     setSettlementFormOpen(false);
   };
 
@@ -445,7 +455,7 @@ const GroupDetailsPage: React.FC = () => {
       </Box>
 
       <Box sx={{ mb: 3 }}>
-        <BalanceCard groupId={groupId!} />
+        <BalanceCard groupId={groupId!} refreshTrigger={balanceRefreshTrigger} />
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -681,7 +691,6 @@ const GroupDetailsPage: React.FC = () => {
       <TabPanel value={tabValue} index={2}>
         {settlements.length > 0 ? (
           <Box>
-            // In GroupDetailsPage.tsx, the SettlementCard usage:
             {settlements.map((settlement) => (
               <SettlementCard
                 key={settlement.settlementId}
