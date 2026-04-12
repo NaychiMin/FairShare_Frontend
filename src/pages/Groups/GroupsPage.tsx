@@ -374,8 +374,33 @@ const GroupsPage = () => {
                 },
               }}
             >
-              <ListItemText
+              {/* <ListItemText
                 primary={group.groupName}
+                secondary={group.category}
+              /> */}
+
+              <ListItemText
+                primary={
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span>{group.groupName}</span>
+                    {(unreadByGroup[String(group.groupId)] ?? 0) > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: "#ef4444",
+                          color: "white",
+                          borderRadius: "999px",
+                          padding: "2px 8px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          minWidth: "20px",
+                          textAlign: "center",
+                        }}
+                      >
+                        {unreadByGroup[String(group.groupId)]}
+                      </span>
+                    )}
+                  </div>
+                }
                 secondary={group.category}
               />
 
