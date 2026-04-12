@@ -19,6 +19,12 @@ interface InviteRequest {
   invitedEmail: string | null;
 }
 
+export interface GroupActionStatus {
+  canArchive: boolean;
+  canDelete: boolean;
+  warningMessage?: string | null;
+}
+
 class GroupService {
 
   async create(data: CreateGroupRequest, jwtToken: string) {
@@ -238,6 +244,20 @@ class GroupService {
     );
     return response.data;
   }
+
+
+  async getGroupActionStatus(groupId: string, jwtToken: string, requesterEmail: string) {
+    const response = await axios.get(`/group/${groupId}/action-status`, {
+      params: { requesterEmail },
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    return response.data;
+  }
+
+
 }
 
 export default new GroupService();

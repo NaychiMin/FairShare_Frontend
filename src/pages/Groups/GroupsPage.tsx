@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Tooltip
 } from "@mui/material";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -22,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import groupService from "../../services/groupService";
 import { useAuth } from "../../context/Authentication/useAuth";
+import notificationService from "../../services/notificationService";
 
 const categories = ["Household", "Trip", "Event", "Project", "Other"] as const;
 
@@ -48,6 +50,12 @@ interface ApiErrorResponse {
       message?: string;
     };
   };
+}
+
+interface GroupActionStatus {
+  canArchive: boolean;
+  canDelete: boolean;
+  warningMessage?: string | null;
 }
 
 const getErrorMessage = (err: unknown, fallback: string): string => {
@@ -83,16 +91,36 @@ const GroupsPage = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
 
+  const [actionStatusMap, setActionStatusMap] = useState<
+      Record<string, GroupActionStatus>
+    >({});
+
+  const [unreadByGroup, setUnreadByGroup] = useState<Record<string, number>>({});
+
+  const fetchUnreadByGroup = async () => {
+    if (!jwtToken || !user?.email) return;
+
+    const data = await notificationService.getUnreadByGroup(jwtToken, user.email);
+    const map = Object.fromEntries(
+      data.map((item: { groupId: string; unreadCount: number }) => [
+        item.groupId,
+        item.unreadCount,
+      ])
+    );
+    setUnreadByGroup(map);
+  };
+
   const fetchGroups = async () => {
     if (!user?.email || !jwtToken) return;
 
     try {
-      const response = (await groupService.getAll(user.email, jwtToken)) as
-        | Group[]
-        | undefined;
+      const response = await groupService.getAll(user.email, jwtToken);
 
       if (response) {
         setGroups(response);
+
+        // load button states separately, but do not block group rendering
+        fetchActionStatuses(response);
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "Failed to fetch groups"));
@@ -103,6 +131,62 @@ const GroupsPage = () => {
     fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!jwtToken || !user?.email) return;
+
+    fetchUnreadByGroup();
+
+    const interval = setInterval(() => {
+      fetchUnreadByGroup();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [jwtToken, user?.email]);
+
+
+  const fetchActionStatuses = async (groupList: Group[]) => {
+    if (!user?.email || !jwtToken) return;
+
+    try {
+      const entries = await Promise.all(
+        groupList
+          .filter((group) => group.isAdmin === true && group.groupId)
+          .map(async (group) => {
+            try {
+              const status = await groupService.getGroupActionStatus(
+                String(group.groupId),
+                jwtToken,
+                user.email
+              );
+
+              return [
+                String(group.groupId),
+                {
+                  canArchive: status.canArchive,
+                  canDelete: status.canDelete,
+                  warningMessage: status.warningMessage,
+                },
+              ] as const;
+            } catch {
+              // fallback so the page still works even if status API fails
+              return [
+                String(group.groupId),
+                {
+                  canArchive: true,
+                  canDelete: true,
+                  warningMessage: null,
+                },
+              ] as const;
+            }
+          })
+      );
+
+      setActionStatusMap(Object.fromEntries(entries));
+    } catch (err) {
+      console.error("Failed to fetch group action statuses", err);
+    }
+  };
 
   const handleOpenArchive = (group: Group) => {
     setArchiveTarget(group);
@@ -305,8 +389,10 @@ const GroupsPage = () => {
                     sx={{
                       border: "1px solid",
                       borderColor: "success.main",
-                      borderRadius: "10px",
+                      borderRadius: "8px",
                       color: "success.main",
+                      width: 40,
+                      height: 40,
                       "&:hover": {
                         backgroundColor: "success.main",
                         color: "white",
@@ -319,28 +405,6 @@ const GroupsPage = () => {
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleOpenArchive(group);
-                    }}
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "warning.main",
-                      borderRadius: "8px",
-                      color: "warning.main",
-                      ml: 1,
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        backgroundColor: "warning.main",
-                        color: "white",
-                      },
-                    }}
-                    aria-label="archive-group"
-                  >
-                    <ArchiveOutlinedIcon />
-                  </IconButton>
-
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
                       handleOpenEdit(group);
                     }}
                     sx={{
@@ -348,41 +412,91 @@ const GroupsPage = () => {
                       borderColor: "primary.main",
                       borderRadius: "8px",
                       color: "primary.main",
+                      width: 40,
+                      height: 40,
                       ml: 1,
-                      transition: "all 0.2s ease",
                       "&:hover": {
                         backgroundColor: "primary.main",
                         color: "white",
                       },
                     }}
-                    aria-label="edit-group"
                   >
                     <EditOutlinedIcon />
                   </IconButton>
 
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenDelete(group);
-                    }}
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "error.main",
-                      borderRadius: "8px",
-                      color: "error.main",
-                      ml: 1,
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        backgroundColor: "error.main",
-                        color: "white",
-                      },
-                    }}
-                    aria-label="delete-group"
+                  <Tooltip
+                    title={
+                      actionStatusMap[String(group.groupId)]?.canArchive === false
+                        ? actionStatusMap[String(group.groupId)]?.warningMessage ||
+                          "Cannot archive group until all balances are zero"
+                        : "Archive group"
+                    }
                   >
-                    <DeleteOutlineIcon />
-                  </IconButton>
+                    <span>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenArchive(group);
+                        }}
+                        disabled={actionStatusMap[String(group.groupId)]?.canArchive === false}
+                        sx={{
+                          border: "1px solid",
+                          borderColor: "warning.main",
+                          borderRadius: "8px",
+                          color: "warning.main",
+                          ml: 1,
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            backgroundColor: "warning.main",
+                            color: "white",
+                          },
+                        }}
+                        aria-label="archive-group"
+                      >
+                        <ArchiveOutlinedIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+
+                 <Tooltip
+                  title={
+                    actionStatusMap[String(group.groupId)]?.canDelete === false
+                      ? actionStatusMap[String(group.groupId)]?.warningMessage ||
+                        "Cannot delete group until all balances are zero"
+                      : "Delete group"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDelete(group);
+                      }}
+                      disabled={actionStatusMap[String(group.groupId)]?.canDelete === false}
+                      sx={{
+                        border: "1px solid",
+                        borderColor: "error.main",
+                        borderRadius: "8px",
+                        color: "error.main",
+                        ml: 1,
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          backgroundColor: "error.main",
+                          color: "white",
+                        },
+                      }}
+                      aria-label="delete-group"
+                    >
+                      <DeleteOutlineIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+
+
+
                 </>
               )}
+
             </MenuItem>
             <Divider />
           </div>
