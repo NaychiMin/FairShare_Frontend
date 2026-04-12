@@ -98,6 +98,12 @@ interface TabPanelProps {
   value: number;
 }
 
+interface GroupActionStatus {
+  canArchive: boolean;
+  canDelete: boolean;
+  warningMessage?: string | null;
+}
+
 const getErrorMessage = (err: unknown, fallback: string): string => {
   if (err instanceof Error && err.message) {
     return err.message;
@@ -134,6 +140,7 @@ const GroupDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, jwtToken } = useAuth();
 
+  const [groupActionStatus, setGroupActionStatus] = useState<GroupActionStatus | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -157,6 +164,11 @@ const GroupDetailsPage: React.FC = () => {
       fetchAll();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId, jwtToken, user?.email]);
+
+
+  useEffect(() => {
+    fetchGroupActionStatus();
   }, [groupId, jwtToken, user?.email]);
 
   const fetchAll = async () => {
@@ -232,6 +244,17 @@ const GroupDetailsPage: React.FC = () => {
 
   const refreshBalance = () => {
     setBalanceRefreshTrigger(prev => prev + 1);
+  };
+
+  const fetchGroupActionStatus = async () => {
+    if (!groupId || !jwtToken || !user?.email) return;
+
+    try {
+      const status = await groupService.getGroupActionStatus(groupId, jwtToken, user.email);
+      setGroupActionStatus(status);
+    } catch (err) {
+      console.error("Failed to fetch group action status", err);
+    }
   };
 
   const handleDeleteSettlement = async (settlementId: string) => {
@@ -358,6 +381,20 @@ const GroupDetailsPage: React.FC = () => {
     }
   };
 
+  const handleArchiveGroup = async () => {
+    if (!groupId || !jwtToken || !user?.email) return;
+
+    try {
+      await groupService.archiveGroup(groupId, jwtToken, user.email);
+      toast.success("Group archived");
+      navigate("/groups/archived");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "Failed to archive group"));
+    } finally {
+      handleMenuClose();
+    }
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -447,9 +484,24 @@ const GroupDetailsPage: React.FC = () => {
               <PeopleIcon sx={{ mr: 1 }} /> Manage Members
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
-              Archive Group
-            </MenuItem>
+            <Divider />
+            <Tooltip
+              title={
+                groupActionStatus?.canArchive
+                  ? "Archive group"
+                  : groupActionStatus?.warningMessage || "Cannot archive group"
+              }
+            >
+              <span>
+                <MenuItem
+                  onClick={handleArchiveGroup}
+                  disabled={!groupActionStatus?.canArchive}
+                  sx={{ color: 'error.main' }}
+                >
+                  Archive Group
+                </MenuItem>
+              </span>
+            </Tooltip>
           </Menu>
         </Box>
       </Box>

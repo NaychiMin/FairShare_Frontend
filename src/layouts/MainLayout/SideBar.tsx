@@ -183,6 +183,7 @@ import type { SideBarProps } from "./index.types";
 import { useNavigate, useLocation } from "react-router-dom";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import { HomeOutlined } from "@mui/icons-material";
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 72;
@@ -209,8 +210,23 @@ const SideBar = ({ isMobile, mobileOpen, collapsed, onClose }: SideBarProps) => 
     },
   });
 
+  const dashboardActive = location.pathname.startsWith("/dashboard");
   const groupsActive = location.pathname.startsWith("/groups");
   const archivedActive = location.pathname.startsWith("/archived-groups");
+
+  const dashboardItem = (
+    <MenuItem onClick={() => navigate("/dashboard")} sx={navItemSx(dashboardActive)}>
+      <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 1.5, color: "inherit" }}>
+        <HomeOutlined />
+      </ListItemIcon>
+      {!collapsed && (
+        <ListItemText
+          primary="Dashboard"
+          primaryTypographyProps={{ fontWeight: 800, fontSize: "14px" }}
+        />
+      )}
+    </MenuItem>
+  );
 
   const groupsItem = (
     <MenuItem onClick={() => navigate("/groups")} sx={navItemSx(groupsActive)}>
@@ -247,6 +263,9 @@ const SideBar = ({ isMobile, mobileOpen, collapsed, onClose }: SideBarProps) => 
     <Box sx={{ p: 2 }}>
       {collapsed ? (
         <>
+          <Tooltip title="Dashboard" placement="right">
+            <Box>{dashboardItem}</Box>
+          </Tooltip>
           <Tooltip title="Groups" placement="right">
             <Box>{groupsItem}</Box>
           </Tooltip>
@@ -256,6 +275,7 @@ const SideBar = ({ isMobile, mobileOpen, collapsed, onClose }: SideBarProps) => 
         </>
       ) : (
         <>
+          {dashboardItem}
           {groupsItem}
           {archivedItem}
         </>
