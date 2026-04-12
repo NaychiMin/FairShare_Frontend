@@ -31,6 +31,13 @@ export interface SettlementResponse {
   updatedAt: string;
 }
 
+export interface EditSettlementRequest {
+  amount: number;
+  settlementDate: string;
+  paymentMethod?: string;
+  notes?: string;
+}
+
 class SettlementService {
 
   // Create Settlement
@@ -74,6 +81,18 @@ class SettlementService {
         'Authorization': `Bearer ${jwtToken}`
       },
     });
+  }
+
+  // Edit settlement by Id
+  async editSettlement(settlementId: string, data: EditSettlementRequest, jwtToken: string, userEmail: string): Promise<SettlementResponse> {
+    const response = await axios.put(`/settlements/${settlementId}`, data, {
+      params: { requesterEmail: userEmail },
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
   }
 }
 
