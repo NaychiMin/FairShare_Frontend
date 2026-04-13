@@ -26,10 +26,11 @@ import expenseService from '../../services/expenseService';
 interface ExpenseCardProps {
   expense: Expense;
   setExpenseFormOpen: (open: boolean) => void;
+  refresh: () => void;
   setEditingExpense: React.Dispatch<React.SetStateAction<Expense | null>>;
 }
 
-const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, setEditingExpense }) => {
+const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, refresh, setEditingExpense }) => {
   const navigate = useNavigate();
   const { user, jwtToken } = useAuth();
   
@@ -49,6 +50,7 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, setExpenseFormOpen, 
       toast.error("Failed to delete expense");
     } finally {
       setDeleteDialogOpen(false);
+      refresh();
     }
   };
 

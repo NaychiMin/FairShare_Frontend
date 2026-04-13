@@ -139,7 +139,6 @@ const GroupDetailsPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { user, jwtToken } = useAuth();
-
   const [groupActionStatus, setGroupActionStatus] = useState<GroupActionStatus | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -526,6 +525,7 @@ const GroupDetailsPage: React.FC = () => {
                 <ExpenseCard
                   key={expense.expenseId}
                   expense={expense}
+                  refresh={fetchGroupExpenses}
                   setExpenseFormOpen={setExpenseFormOpen}
                   setEditingExpense={setEditingExpense}
                 />
