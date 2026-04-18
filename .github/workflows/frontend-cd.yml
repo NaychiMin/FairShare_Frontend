@@ -57,7 +57,8 @@ jobs:
           git pull origin main
           
           # pull and restart frontend
+          docker-compose down
           docker-compose pull
-          docker-compose up -d --force-recreate --remove-orphans
+          docker-compose up -d --force-recreate --remove-orphans --pull always
           
           echo "Frontend deployed"
