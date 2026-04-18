@@ -28,6 +28,9 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Ensure that index.html is never cached and static assets are cached aggressively
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
