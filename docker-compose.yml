@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    image: ghcr.io/naychimin/fairshare_frontend:latest
+    image: ghcr.io/naychimin/fairshare_frontend:${IMAGE_TAG-latest}
     container_name: fairshare-frontend
     restart: unless-stopped
     ports:

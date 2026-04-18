@@ -36,7 +36,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/naychimin/fairshare_frontend:latest
+        tags: |
+          type=sha
+          latest
 
   deploy:
     needs: build-and-push
@@ -55,10 +57,12 @@ jobs:
 
           # Pull latest compose file
           git pull origin main
+
+          # Set IMAGE_TAG environment variable for compose file
+          export IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha }}
           
           # pull and restart frontend
-          docker-compose down
           docker-compose pull
-          docker-compose up -d --force-recreate --remove-orphans --pull always
+          docker-compose up -d --force-recreate --remove-orphans
           
-          echo "Frontend deployed"
+          echo "Frontend deployed version: $IMAGE_TAG"
