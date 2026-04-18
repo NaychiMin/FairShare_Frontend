@@ -9,6 +9,9 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
+# Install native Alpine Linux (musl) optional dependencies
+RUN npm install @rollup/rollup-linux-x64-musl lightningcss-linux-x64-musl @tailwindcss/oxide-linux-x64-musl --no-save
+
 # Copy the rest of the application
 COPY . .
 
