@@ -31,14 +31,21 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Generate metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/naychimin/fairshare_frontend
+        tags: |
+          type=sha,format=short
+
     - name: Build and push image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
-        tags: |
-          type=sha
-          latest
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
     needs: build-and-push
@@ -59,7 +66,7 @@ jobs:
           git pull origin main
 
           # Set IMAGE_TAG environment variable for compose file
-          export IMAGE_TAG=sha-${{ github.event.workflow_run.head_sha }}
+          export IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
           
           # pull and restart frontend
           docker-compose pull
