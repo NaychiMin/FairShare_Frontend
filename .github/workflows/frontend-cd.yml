@@ -65,11 +65,12 @@ jobs:
           # Pull latest compose file
           git pull origin main
 
-          # Set IMAGE_TAG environment variable for compose file
-          export IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
+          IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
+
+          echo "Deploying frontend: $IMAGE_TAG"
           
           # pull and restart frontend
-          docker-compose pull
-          docker-compose up -d --force-recreate --remove-orphans
+          IMAGE_TAG=$IMAGE_TAG docker-compose pull
+          IMAGE_TAG=$IMAGE_TAG docker-compose up -d --force-recreate --remove-orphans
           
           echo "Frontend deployed version: $IMAGE_TAG"
