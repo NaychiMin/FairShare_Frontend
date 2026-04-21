@@ -44,7 +44,7 @@ const SentInvitesPage = () => {
   }, [user?.email, jwtToken]);
 
   useEffect(() => {
-    void fetchSentInvites();
+    fetchSentInvites();
   }, [fetchSentInvites]);
 
   if (loading) {

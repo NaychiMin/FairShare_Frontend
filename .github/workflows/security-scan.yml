@@ -5,13 +5,14 @@ on:
     branches: [ "main" ]
   pull_request:
 
-permissions:
-  contents: read
-  security-events: write
+permissions: {} 
 
 jobs:
   snyk-scan:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, useMemo, type ReactNode } from "react";
 import type { UserBadgeDto } from "../../types/Badge";
 import { WebSocketService } from "../../services/websocket";
 import { BadgeContext } from "./BadgeContext";
@@ -57,13 +57,18 @@ export const BadgeProvider: React.FC<BadgeProviderProps> = ({ children, userId }
         };
     }, [userId, showBadgePopup]);
 
+    const value = useMemo(
+    () => ({
+        currentBadge,
+        showBadgePopup,
+        hideBadgePopup,
+        isPopupOpen,
+    }),
+    [currentBadge, showBadgePopup, hideBadgePopup, isPopupOpen]
+    );
+    
     return (
-        <BadgeContext.Provider value={{
-            currentBadge,
-            showBadgePopup,
-            hideBadgePopup,
-            isPopupOpen
-        }}>
+        <BadgeContext.Provider value={value}>
             {children}
         </BadgeContext.Provider>
     );

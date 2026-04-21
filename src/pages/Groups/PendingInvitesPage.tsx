@@ -52,7 +52,7 @@ const PendingInvitesPage = () => {
   }, [user?.email, jwtToken]);
 
   useEffect(() => {
-    void fetchPendingInvites();
+    fetchPendingInvites();
   }, [fetchPendingInvites]);
 
   const handleAccept = async (token: string) => {
