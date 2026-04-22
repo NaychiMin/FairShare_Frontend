@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo  } from "react";
 import authService from "../../services/authService";
 import { AuthContext } from "./AuthContext";
 import type { User } from "../../types/User";
@@ -31,46 +31,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchUser();
   }, []);
   
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const response = await authService.login({ email, password });
-      setIsAuthenticated(true);
-      setJwtToken(response.jwt);
-      setUser(response.user);
-      localStorage.setItem("token", response.jwt);
-    } finally {
-      setLoading(false); // <--- important
-    }
-  };
+  const value = useMemo(() => {
+    const login = async (email: string, password: string) => {
+      setLoading(true);
 
-  const updateUser = async (user: User) => {
-    setUser(user);
-  };
+      try {
+        const response = await authService.login({ email, password });
 
-  const logout = () => {
-    authService.logout();
-    setJwtToken(null);
-    setUser(null);
+        setIsAuthenticated(true);
+        setJwtToken(response.jwt);
+        setUser(response.user);
 
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
+        localStorage.setItem("token", response.jwt);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    navigate("/login");
-  };
+    const updateUser = (user: User) => {
+      setUser(user);
+    };
+
+    const logout = () => {
+      authService.logout();
+
+      setJwtToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
+
+      localStorage.removeItem("token");
+
+      navigate("/login");
+    };
+
+    return {
+      isAuthenticated,
+      jwtToken,
+      user,
+      login,
+      logout,
+      updateUser,
+      loading,
+    };
+  }, [isAuthenticated, jwtToken, user, loading, navigate]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        jwtToken,
-        user,
-        login,
-        logout,
-        updateUser,
-        loading,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

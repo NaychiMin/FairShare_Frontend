@@ -203,7 +203,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             type="number"
             fullWidth
             value={amount || ''}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
+            onChange={(e) => setAmount(Number.parseFloat(e.target.value))}
             error={!!errors.amount}
             helperText={errors.amount}
             InputProps={{

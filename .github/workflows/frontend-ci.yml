@@ -5,14 +5,14 @@ on:
     branches: ["main"]
   pull_request:
 
-permissions:
-  contents: read
-  packages: write
-  security-events: write
+permissions: {}
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository

@@ -10,7 +10,7 @@ interface BadgeWrapperProps {
 
 export const AuthBadgeProvider: React.FC<BadgeWrapperProps> = ({ children }) => {
   const { user } = useAuth();
-  if (!user || !user.userId) {
+  if (!user?.userId) {
     return children;
   }
   return (
