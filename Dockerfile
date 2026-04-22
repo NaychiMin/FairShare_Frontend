@@ -15,8 +15,6 @@ RUN npm run build
 # ---------- Stage 2: Serve ----------
 FROM nginx:alpine3.21
 
-RUN apk update && apk upgrade --no-cache
-
 RUN rm -rf /usr/share/nginx/html/*
 
 COPY --from=builder /app/dist /usr/share/nginx/html
