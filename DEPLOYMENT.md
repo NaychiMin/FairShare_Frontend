@@ -14,3 +14,9 @@ git clone https://github.com/NaychiMin/FairShare_Frontend.git .
 # Update .env file to update the public address of your server
 
 # Fix CORS policy in backend (can refer to backend repo deployment.md for more info)
+
+
+
+# If you need to stop your container
+cd ~/fairshare-frontend-deployment
+docker compose -f docker-compose.yml down
