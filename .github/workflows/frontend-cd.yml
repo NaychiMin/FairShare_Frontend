@@ -79,3 +79,17 @@ jobs:
           IMAGE_TAG=$IMAGE_TAG docker-compose up -d --force-recreate --remove-orphans
           
           echo "Frontend deployed version: $IMAGE_TAG"
+
+  zap-scan:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run ZAP on deployed frontend
+      uses: zaproxy/action-full-scan@v0.13.0
+      with:
+        token: ${{ secrets.ZAP_PAT }}
+        target: "https://143.198.195.225"
+        cmd_options: "-I -d"
+        fail_action: false
+        artifact_name: zap-prod-scan
