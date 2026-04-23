@@ -13,7 +13,15 @@ RUN npm run build
 
 
 # ---------- Stage 2: Serve ----------
-FROM nginx:alpine3.21
+FROM nginx:alpine
+
+RUN apk update && apk upgrade --no-cache && \
+    apk add --no-cache \
+    libxml2 \
+    libpng \
+    zlib \
+    expat \
+    openssl
 
 RUN rm -rf /usr/share/nginx/html/*
 
