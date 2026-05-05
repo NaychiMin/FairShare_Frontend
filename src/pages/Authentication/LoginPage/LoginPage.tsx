@@ -88,7 +88,7 @@ const LoginPage = () => {
           sx={{ width: "400", mx: "auto" }}
         >
           <Typography variant="h5" mb={2}>
-            Please Log In to Your Account
+            Log In
           </Typography>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
